@@ -1,0 +1,23 @@
+# ─────────────────────────────────────────────────────
+#  HireEU — Vercel Environment Variables
+#  Add ALL of these in Vercel Dashboard → Project → Settings → Environment Variables
+# ─────────────────────────────────────────────────────
+
+# ── Neon Postgres (free at neon.tech) ──
+# Copy the "Connection string" from the Neon project dashboard
+DATABASE_URL=postgresql://user:password@ep-xxxx.us-east-2.aws.neon.tech/neondb?sslmode=require
+
+# ── Gmail SMTP ──
+# Use an App Password — NOT your real Gmail password
+# Google Account → Security → 2-Step Verification → App Passwords → Create
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your-gmail@gmail.com
+SMTP_PASS=xxxx xxxx xxxx xxxx
+
+# ── Admin notification email (me) ──
+ADMIN_EMAIL=your-gmail@gmail.com
+
+# ── Site URL (used in confirmation email button) ──
+SITE_URL=https://hireeu.vercel.app
