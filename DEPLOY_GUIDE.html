@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HireEU — Deploy Guide</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy: #0d1f3c; --blue: #1a4dcc; --sky: #3b82f6;
+      --green: #16a34a; --amber: #d97706; --red: #dc2626;
+      --off: #f7f9fc; --border: #dde4ef; --muted: #64748b; --text: #1e293b;
+    }
+    body { font-family: 'DM Sans', sans-serif; color: var(--text); background: var(--off); line-height: 1.6; }
+    .page { max-width: 780px; margin: 0 auto; padding: 48px 24px 80px; }
+
+    /* Header */
+    .page-header { text-align: center; margin-bottom: 48px; }
+    .logo { font-size: 1.8rem; font-weight: 800; color: var(--navy); letter-spacing: -0.03em; }
+    .logo span { color: var(--blue); }
+    h1 { font-size: 2rem; font-weight: 700; color: var(--navy); margin: 12px 0 8px; letter-spacing: -0.02em; }
+    .subtitle { color: var(--muted); font-size: 1rem; }
+
+    /* Progress bar */
+    .progress { display: flex; gap: 0; margin-bottom: 48px; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
+    .prog-step { flex: 1; padding: 10px 4px; text-align: center; font-size: 0.72rem; font-weight: 600;
+                 background: white; color: var(--muted); border-right: 1px solid var(--border); letter-spacing: 0.04em; text-transform: uppercase; }
+    .prog-step:last-child { border-right: none; }
+    .prog-step.active { background: var(--blue); color: white; }
+    .prog-step.done { background: #dcfce7; color: var(--green); }
+
+    /* Steps */
+    .step { background: white; border: 1px solid var(--border); border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+    .step-header { padding: 20px 24px; display: flex; align-items: center; gap: 16px; border-bottom: 1px solid var(--border); }
+    .step-num { width: 36px; height: 36px; border-radius: 50%; background: var(--blue); color: white;
+                display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; flex-shrink: 0; }
+    .step-num.free { background: var(--green); }
+    .step-title { font-size: 1.1rem; font-weight: 700; color: var(--navy); }
+    .step-badge { margin-left: auto; font-size: 0.72rem; font-weight: 600; padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
+    .badge-free { background: #dcfce7; color: var(--green); }
+    .badge-time { background: #fef3c7; color: var(--amber); }
+
+    .step-body { padding: 24px; }
+    .step-body p { color: var(--muted); font-size: 0.95rem; margin-bottom: 16px; }
+
+    /* Instructions list */
+    .instructions { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .instructions li { display: flex; gap: 12px; align-items: flex-start; }
+    .ins-num { width: 22px; height: 22px; border-radius: 50%; background: var(--off); border: 1.5px solid var(--border);
+               color: var(--blue); font-size: 0.72rem; font-weight: 700; display: flex; align-items: center;
+               justify-content: center; flex-shrink: 0; margin-top: 1px; }
+    .instructions li span { font-size: 0.92rem; color: var(--text); }
+    .instructions li span strong { color: var(--navy); }
+    .instructions li span a { color: var(--blue); font-weight: 600; }
+
+    /* Code block */
+    .code-block { background: var(--navy); color: #e2e8f0; font-family: 'DM Mono', monospace;
+                  font-size: 0.83rem; padding: 14px 18px; border-radius: 10px; margin: 12px 0;
+                  line-height: 1.6; overflow-x: auto; position: relative; }
+    .code-block .comment { color: #64748b; }
+    .code-block .key { color: #93c5fd; }
+    .code-block .val { color: #86efac; }
+
+    /* Env table */
+    .env-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.875rem; }
+    .env-table th { background: var(--off); text-align: left; padding: 8px 12px; font-size: 0.75rem;
+                    font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+                    border-bottom: 2px solid var(--border); }
+    .env-table td { padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .env-table tr:last-child td { border-bottom: none; }
+    .env-key { font-family: 'DM Mono', monospace; font-size: 0.8rem; color: var(--blue); font-weight: 500; }
+    .env-val { color: var(--muted); font-size: 0.85rem; }
+    .env-req { font-size: 0.7rem; font-weight: 700; padding: 2px 7px; border-radius: 999px; }
+    .req { background: #fee2e2; color: var(--red); }
+    .opt { background: #fef3c7; color: var(--amber); }
+
+    /* Alert box */
+    .alert { border-radius: 10px; padding: 14px 16px; font-size: 0.875rem; margin: 12px 0; display: flex; gap: 10px; }
+    .alert-blue { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; }
+    .alert-green { background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; }
+    .alert-amber { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+    .alert-icon { font-size: 1rem; flex-shrink: 0; }
+
+    /* Summary */
+    .summary { background: linear-gradient(135deg, var(--navy), var(--blue)); border-radius: 16px;
+               padding: 32px; color: white; text-align: center; margin-top: 32px; }
+    .summary h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 8px; }
+    .summary p { color: rgba(255,255,255,0.7); font-size: 0.95rem; margin-bottom: 20px; }
+    .summary .checklist { text-align: left; display: inline-flex; flex-direction: column;
+                          gap: 8px; background: rgba(255,255,255,0.08); border-radius: 12px; padding: 20px 24px; }
+    .summary .checklist li { list-style: none; font-size: 0.9rem; color: rgba(255,255,255,0.85); }
+    .summary .checklist li::before { content: '✓ '; color: #86efac; font-weight: 700; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <div class="page-header">
+    <div class="logo">Hire<span>EU</span></div>
+    <h1>Deploy Guide — No Terminal Needed</h1>
+    <p class="subtitle">4 steps · ~20 minutes · 100% free</p>
+  </div>
+
+  <!-- STEP 1: GitHub -->
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">1</div>
+      <div>
+        <div class="step-title">Upload code to GitHub</div>
+      </div>
+      <span class="step-badge badge-free">Free</span>
+      <span class="step-badge badge-time">~5 min</span>
+    </div>
+    <div class="step-body">
+      <p>GitHub stores your code so Vercel can access it. You don't need to know Git — use the website.</p>
+      <ul class="instructions">
+        <li><div class="ins-num">1</div><span>Go to <a href="https://github.com" target="_blank">github.com</a> → <strong>Sign up</strong> for a free account</span></li>
+        <li><div class="ins-num">2</div><span>Click the <strong>+</strong> icon (top right) → <strong>New repository</strong></span></li>
+        <li><div class="ins-num">3</div><span>Name it <strong>hireeu</strong> → set to <strong>Private</strong> → click <strong>Create repository</strong></span></li>
+        <li><div class="ins-num">4</div><span>On the next page, click <strong>"uploading an existing file"</strong> link</span></li>
+        <li><div class="ins-num">5</div><span>Drag the entire <strong>hireeu-vercel</strong> folder contents into the upload area (all files and the <code>api/</code> + <code>public/</code> folders)</span></li>
+        <li><div class="ins-num">6</div><span>Click <strong>Commit changes</strong> → done</span></li>
+      </ul>
+      <div class="alert alert-amber">
+        <span class="alert-icon">⚠️</span>
+        <span><strong>Do NOT upload</strong> the <code>.env</code> file if you create one. Your passwords stay on your computer only — you'll enter them in Vercel's dashboard instead.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2: Neon DB -->
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">2</div>
+      <div>
+        <div class="step-title">Create a free Neon database</div>
+      </div>
+      <span class="step-badge badge-free">Free forever</span>
+      <span class="step-badge badge-time">~3 min</span>
+    </div>
+    <div class="step-body">
+      <p>Neon is a free Postgres database in the cloud. It stores your waitlist email signups.</p>
+      <ul class="instructions">
+        <li><div class="ins-num">1</div><span>Go to <a href="https://neon.tech" target="_blank">neon.tech</a> → <strong>Sign up free</strong> (use your GitHub account)</span></li>
+        <li><div class="ins-num">2</div><span>Click <strong>Create Project</strong> → name it <strong>hireeu</strong> → pick any region → <strong>Create</strong></span></li>
+        <li><div class="ins-num">3</div><span>On the dashboard, find the <strong>Connection String</strong> — it looks like:<br/>
+          <div class="code-block">postgresql://user:password@ep-xxx.us-east-2.aws.neon.tech/neondb?sslmode=require</div>
+        </span></li>
+        <li><div class="ins-num">4</div><span><strong>Copy that full string</strong> and save it in a notepad — you'll need it in Step 3</span></li>
+      </ul>
+      <div class="alert alert-green">
+        <span class="alert-icon">✅</span>
+        <span>Neon's free tier gives you <strong>0.5 GB storage</strong> — enough for tens of thousands of email signups. No credit card needed.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3: Gmail App Password -->
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">3</div>
+      <div>
+        <div class="step-title">Create a Gmail App Password</div>
+      </div>
+      <span class="step-badge badge-free">Free</span>
+      <span class="step-badge badge-time">~3 min</span>
+    </div>
+    <div class="step-body">
+      <p>This lets HireEU send emails through your Gmail without exposing your real password.</p>
+      <ul class="instructions">
+        <li><div class="ins-num">1</div><span>Go to <a href="https://myaccount.google.com/security" target="_blank">myaccount.google.com/security</a></span></li>
+        <li><div class="ins-num">2</div><span>Make sure <strong>2-Step Verification</strong> is turned ON (required)</span></li>
+        <li><div class="ins-num">3</div><span>Search for <strong>"App Passwords"</strong> in the search bar at top → click it</span></li>
+        <li><div class="ins-num">4</div><span>Type <strong>HireEU</strong> as the app name → click <strong>Create</strong></span></li>
+        <li><div class="ins-num">5</div><span>Google shows a <strong>16-character password</strong> like <code>abcd efgh ijkl mnop</code> → <strong>copy it</strong> (it only shows once)</span></li>
+      </ul>
+      <div class="alert alert-blue">
+        <span class="alert-icon">ℹ️</span>
+        <span>This App Password is separate from your Gmail login. If you ever want to revoke it, just delete it from the same App Passwords page.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 4: Vercel -->
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">4</div>
+      <div>
+        <div class="step-title">Deploy on Vercel</div>
+      </div>
+      <span class="step-badge badge-free">Free forever</span>
+      <span class="step-badge badge-time">~8 min</span>
+    </div>
+    <div class="step-body">
+      <p>Vercel hosts your site for free and gives you a public URL instantly.</p>
+      <ul class="instructions">
+        <li><div class="ins-num">1</div><span>Go to <a href="https://vercel.com" target="_blank">vercel.com</a> → <strong>Sign up with GitHub</strong></span></li>
+        <li><div class="ins-num">2</div><span>Click <strong>Add New → Project</strong> → select your <strong>hireeu</strong> GitHub repo</span></li>
+        <li><div class="ins-num">3</div><span>Leave all build settings as-is → <strong>don't click Deploy yet</strong></span></li>
+        <li><div class="ins-num">4</div><span>Expand <strong>"Environment Variables"</strong> and add each row below one by one:</span></li>
+      </ul>
+
+      <table class="env-table">
+        <thead><tr><th>Variable Name</th><th>Value</th><th></th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="env-key">DATABASE_URL</td>
+            <td class="env-val">Your Neon connection string from Step 2</td>
+            <td><span class="env-req req">Required</span></td>
+          </tr>
+          <tr>
+            <td class="env-key">SMTP_HOST</td>
+            <td class="env-val">smtp.gmail.com</td>
+            <td><span class="env-req req">Required</span></td>
+          </tr>
+          <tr>
+            <td class="env-key">SMTP_PORT</td>
+            <td class="env-val">587</td>
+            <td><span class="env-req req">Required</span></td>
+          </tr>
+          <tr>
+            <td class="env-key">SMTP_SECURE</td>
+            <td class="env-val">false</td>
+            <td><span class="env-req req">Required</span></td>
+          </tr>
+          <tr>
+            <td class="env-key">SMTP_USER</td>
+            <td class="env-val">your-gmail@gmail.com</td>
+            <td><span class="env-req req">Required</span></td>
+          </tr>
+          <tr>
+            <td class="env-key">SMTP_PASS</td>
+            <td class="env-val">Your 16-char App Password from Step 3</td>
+            <td><span class="env-req req">Required</span></td>
+          </tr>
+          <tr>
+            <td class="env-key">ADMIN_EMAIL</td>
+            <td class="env-val">your-gmail@gmail.com (to receive signup alerts)</td>
+            <td><span class="env-req opt">Optional</span></td>
+          </tr>
+          <tr>
+            <td class="env-key">SITE_URL</td>
+            <td class="env-val">https://hireeu.vercel.app (update after deploy)</td>
+            <td><span class="env-req opt">Optional</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <ul class="instructions" style="margin-top:16px">
+        <li><div class="ins-num">5</div><span>Click <strong>Deploy</strong> — wait ~60 seconds</span></li>
+        <li><div class="ins-num">6</div><span>Vercel gives you a URL like <strong>hireeu.vercel.app</strong> — click it to see your live site!</span></li>
+        <li><div class="ins-num">7</div><span>Test it: enter your own email → you should receive the confirmation email within 30 seconds</span></li>
+      </ul>
+
+      <div class="alert alert-green" style="margin-top:16px">
+        <span class="alert-icon">🎉</span>
+        <span>Your site is now live! Every time someone signs up, they get an email and you get an admin notification.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- BONUS: Domain -->
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num" style="background:#7c3aed">★</div>
+      <div>
+        <div class="step-title">Optional: Connect a real domain</div>
+      </div>
+      <span class="step-badge" style="background:#f3e8ff;color:#7c3aed">~$10/yr</span>
+      <span class="step-badge badge-time">~10 min</span>
+    </div>
+    <div class="step-body">
+      <p>Want <strong>hireeu.app</strong> instead of <strong>hireeu.vercel.app</strong>? Do this after your site is working.</p>
+      <ul class="instructions">
+        <li><div class="ins-num">1</div><span>Buy a domain at <a href="https://namecheap.com" target="_blank">namecheap.com</a> — search for <code>hireeu.app</code>, <code>hireeu.co</code>, or <code>gethireeu.com</code></span></li>
+        <li><div class="ins-num">2</div><span>In Vercel: go to your project → <strong>Settings → Domains → Add</strong> → type your domain</span></li>
+        <li><div class="ins-num">3</div><span>Vercel shows you a <strong>CNAME record</strong> to copy</span></li>
+        <li><div class="ins-num">4</div><span>In Namecheap: <strong>Domain List → Manage → Advanced DNS</strong> → add the CNAME record Vercel gave you</span></li>
+        <li><div class="ins-num">5</div><span>Wait 5–30 minutes for DNS to update → your domain is live with free HTTPS ✓</span></li>
+        <li><div class="ins-num">6</div><span>Update the <strong>SITE_URL</strong> environment variable in Vercel to your new domain, then redeploy</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Summary -->
+  <div class="summary">
+    <h2>🚀 You're all set</h2>
+    <p>Here's what you'll have when done:</p>
+    <ul class="checklist">
+      <li>Live landing page at yourname.vercel.app (or custom domain)</li>
+      <li>Waitlist signups stored in Neon Postgres database</li>
+      <li>Branded confirmation email sent to every signup</li>
+      <li>Admin alert email sent to you on each signup</li>
+      <li>Live signup counter that updates automatically</li>
+      <li>Free HTTPS certificate (automatic via Vercel)</li>
+      <li>Auto-redeploy when you update code on GitHub</li>
+    </ul>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HireEU — AI Job Assistant for Foreigners in Poland & the EU</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=Syne:wght@400;500;600;700;800&family=Mulish:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #f0ebe1;
+    --cream2: #e8e2d6;
+    --ink: #1a1612;
+    --ink2: #3d3730;
+    --ink3: #7a6f64;
+    --surface: #ffffff;
+    --border: #d4cdc4;
+    --border2: #c4bdb3;
+    --red: #d63f2a;
+    --red2: #e85c47;
+    --red-light: #fdf1ef;
+    --gold: #c49a3c;
+    --serif: 'Playfair Display', Georgia, serif;
+    --sans: 'Syne', sans-serif;
+    --body: 'Mulish', sans-serif;
+  }
+ 
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+ 
+  body {
+    font-family: var(--body);
+    background: var(--cream);
+    color: var(--ink);
+    font-size: 16px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+ 
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: var(--ink);
+    height: 60px; padding: 0 40px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+ 
+  .nav-logo {
+    font-family: var(--sans); font-size: 20px; font-weight: 800;
+    color: var(--cream); text-decoration: none; letter-spacing: -0.5px;
+  }
+  .nav-logo span { color: var(--red2); }
+ 
+  .nav-right { display: flex; align-items: center; gap: 24px; }
+ 
+  .nav-pill {
+    font-family: var(--sans); font-size: 10px; font-weight: 700;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--ink); background: var(--gold);
+    padding: 4px 12px; border-radius: 2px;
+  }
+ 
+  .nav-link {
+    font-family: var(--sans); font-size: 13px; font-weight: 500;
+    color: rgba(240,235,225,0.6); text-decoration: none; transition: color 0.2s;
+  }
+  .nav-link:hover { color: var(--cream); }
+ 
+  /* ── LAYOUT ── */
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 32px; }
+ 
+  /* ── HERO ── */
+  .hero {
+    padding: 130px 0 0;
+    background: var(--ink);
+    overflow: hidden;
+    position: relative;
+  }
+ 
+  .hero-inner {
+    display: grid;
+    grid-template-columns: 1fr 420px;
+    gap: 0;
+    align-items: end;
+    min-height: 480px;
+  }
+ 
+  .hero-left { padding: 40px 0 60px; }
+ 
+  .hero-eyebrow {
+    font-family: var(--sans); font-size: 11px; font-weight: 700;
+    letter-spacing: 3px; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 24px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .hero-eyebrow::before { content: ''; width: 32px; height: 1px; background: var(--gold); }
+ 
+  .hero h1 {
+    font-family: var(--serif); font-size: clamp(42px, 5.5vw, 72px);
+    font-weight: 900; line-height: 1.05; letter-spacing: -1px;
+    color: var(--cream); margin-bottom: 28px;
+  }
+ 
+  .hero h1 em {
+    font-style: italic; color: var(--red2);
+  }
+ 
+  .hero-desc {
+    font-size: 17px; color: rgba(240,235,225,0.65);
+    max-width: 480px; line-height: 1.75; margin-bottom: 40px;
+    font-weight: 300;
+  }
+ 
+  .hero-cta { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+ 
+  .btn-main {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--red); color: white;
+    font-family: var(--sans); font-size: 14px; font-weight: 700;
+    letter-spacing: 0.5px; text-transform: uppercase;
+    padding: 14px 32px; border-radius: 3px; border: none;
+    cursor: pointer; text-decoration: none; transition: all 0.2s;
+  }
+  .btn-main:hover { background: var(--red2); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(214,63,42,0.4); }
+  .btn-main:active { transform: none; }
+ 
+  .hero-sub { font-family: var(--body); font-size: 12px; color: rgba(240,235,225,0.4); }
+ 
+  .hero-right {
+    background: var(--red);
+    align-self: stretch;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 40px 36px;
+    position: relative;
+    overflow: hidden;
+  }
+ 
+  .hero-right::before {
+    content: '';
+    position: absolute; top: -60px; right: -60px;
+    width: 220px; height: 220px;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 50%;
+  }
+  .hero-right::after {
+    content: '';
+    position: absolute; top: 20px; right: 20px;
+    width: 120px; height: 120px;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 50%;
+  }
+ 
+  .hero-stat {
+    margin-bottom: 28px; position: relative; z-index: 1;
+  }
+  .hero-stat-num {
+    font-family: var(--serif); font-size: 52px; font-weight: 900;
+    color: white; line-height: 1; letter-spacing: -2px;
+  }
+  .hero-stat-label {
+    font-family: var(--sans); font-size: 11px; font-weight: 600;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: rgba(255,255,255,0.6); margin-top: 4px;
+  }
+ 
+  .hero-tagline {
+    font-family: var(--serif); font-size: 20px; font-style: italic;
+    color: rgba(255,255,255,0.85); line-height: 1.4;
+    position: relative; z-index: 1;
+  }
+ 
+  /* ── FLAGS STRIP ── */
+  .flags-strip {
+    background: var(--cream2);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 0;
+  }
+  .flags-inner {
+    display: flex; align-items: center; gap: 0; flex-wrap: wrap;
+  }
+  .flags-label {
+    font-family: var(--sans); font-size: 10px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase; color: var(--ink3);
+    padding-right: 28px; border-right: 1px solid var(--border);
+    margin-right: 28px; white-space: nowrap; flex-shrink: 0;
+  }
+  .flags-row { display: flex; gap: 20px; flex-wrap: wrap; align-items: center; }
+  .flag-item {
+    display: flex; align-items: center; gap: 7px;
+    font-family: var(--sans); font-size: 12px; font-weight: 600;
+    color: var(--ink2);
+  }
+  .flag-item .fi { font-size: 18px; }
+  .flag-more { font-family: var(--body); font-size: 12px; color: var(--ink3); }
+ 
+  /* ── SECTION HEADERS ── */
+  .eyebrow {
+    font-family: var(--sans); font-size: 10px; font-weight: 700;
+    letter-spacing: 3px; text-transform: uppercase; color: var(--red);
+    margin-bottom: 16px; display: flex; align-items: center; gap: 10px;
+  }
+  .eyebrow::before { content: ''; width: 20px; height: 2px; background: var(--red); }
+ 
+  .sec-title {
+    font-family: var(--serif); font-size: clamp(28px, 3.5vw, 44px);
+    font-weight: 900; line-height: 1.1; letter-spacing: -0.5px;
+    color: var(--ink); margin-bottom: 16px;
+  }
+  .sec-sub { font-size: 16px; color: var(--ink3); max-width: 500px; line-height: 1.7; font-weight: 300; }
+ 
+  /* ── HOW IT WORKS ── */
+  #how-it-works { padding: 100px 0; background: var(--cream); }
+  .how-header { margin-bottom: 64px; }
+ 
+  .steps-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); }
+ 
+  .step-card {
+    background: var(--surface); padding: 40px 32px;
+    transition: background 0.2s;
+  }
+  .step-card:hover { background: var(--cream); }
+ 
+  .step-num {
+    font-family: var(--serif); font-size: 48px; font-weight: 900;
+    color: var(--cream2); line-height: 1; margin-bottom: 20px;
+    letter-spacing: -2px;
+  }
+  .step-icon { font-size: 28px; margin-bottom: 16px; display: block; }
+  .step-card h3 { font-family: var(--sans); font-size: 18px; font-weight: 700; margin-bottom: 12px; color: var(--ink); }
+  .step-card p { font-size: 14px; color: var(--ink3); line-height: 1.7; font-weight: 300; }
+ 
+  /* ── PAIN POINTS ── */
+  .pain-section { padding: 0 0 100px; background: var(--cream); }
+  .pain-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
+  .pain-hd { position: sticky; top: 80px; }
+ 
+  .pain-list { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--border); }
+  .pain-item {
+    display: flex; gap: 16px; align-items: flex-start;
+    padding: 20px 24px; border-bottom: 1px solid var(--border);
+    background: var(--surface); transition: background 0.15s;
+  }
+  .pain-item:last-child { border-bottom: none; }
+  .pain-item:hover { background: var(--red-light); }
+  .pain-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+  .pain-item p { font-size: 14px; color: var(--ink2); line-height: 1.6; font-weight: 400; }
+ 
+  /* ── FEATURES ── */
+  .features-section { padding: 100px 0; background: var(--ink); }
+  .features-hd { margin-bottom: 60px; }
+  .features-hd .eyebrow { color: var(--gold); }
+  .features-hd .eyebrow::before { background: var(--gold); }
+  .features-hd .sec-title { color: var(--cream); }
+ 
+  .features-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: rgba(255,255,255,0.08); }
+ 
+  .feature-card {
+    background: var(--ink); padding: 32px 28px;
+    border: 1px solid rgba(255,255,255,0.06);
+    transition: background 0.2s;
+    position: relative;
+  }
+  .feature-card:hover { background: var(--ink2); }
+ 
+  .feature-icon { font-size: 26px; margin-bottom: 16px; display: block; }
+  .feature-card h4 { font-family: var(--sans); font-size: 15px; font-weight: 700; margin-bottom: 10px; color: var(--cream); letter-spacing: 0.2px; }
+  .feature-card p { font-size: 13px; color: rgba(240,235,225,0.5); line-height: 1.65; font-weight: 300; }
+ 
+  /* ── APP SECTION ── */
+  .app-section { padding: 100px 0; background: var(--cream2); border-top: 1px solid var(--border); }
+  .app-hd { margin-bottom: 48px; }
+ 
+  .app-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 4px 40px rgba(26,22,18,0.08);
+  }
+ 
+  .app-step { padding: 36px 40px; border-bottom: 1px solid var(--border2); }
+  .app-step:last-child { border-bottom: none; }
+ 
+  .step-label-inner {
+    font-family: var(--sans); font-size: 10px; font-weight: 700;
+    letter-spacing: 2.5px; text-transform: uppercase; color: var(--red);
+    margin-bottom: 24px; display: flex; align-items: center; gap: 12px;
+  }
+  .step-label-inner::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+ 
+  label {
+    display: block; font-family: var(--sans); font-size: 12px; font-weight: 700;
+    letter-spacing: 0.5px; text-transform: uppercase; color: var(--ink2);
+    margin-bottom: 8px;
+  }
+  label small { font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--ink3); margin-left: 6px; }
+ 
+  .upload-zone {
+    border: 2px dashed var(--border2); border-radius: 8px;
+    padding: 32px 24px; text-align: center; cursor: pointer;
+    transition: all 0.2s; background: var(--cream);
+  }
+  .upload-zone:hover, .upload-zone.drag-over { border-color: var(--red); background: var(--red-light); }
+  .upload-icon { font-size: 28px; display: block; margin-bottom: 10px; }
+  .upload-text { font-family: var(--sans); font-size: 14px; color: var(--ink2); display: block; margin-bottom: 4px; }
+  .upload-link { color: var(--red); text-decoration: underline; }
+  .upload-hint { font-family: var(--sans); font-size: 11px; color: var(--ink3); display: block; }
+  .upload-filename { font-family: var(--sans); font-size: 14px; color: var(--ink); font-weight: 700; display: block; margin-bottom: 4px; }
+  .upload-change { font-family: var(--sans); font-size: 11px; color: var(--red); text-decoration: underline; cursor: pointer; display: block; }
+ 
+  textarea, input[type="text"] {
+    width: 100%; background: var(--cream); border: 1px solid var(--border2);
+    border-radius: 3px; padding: 12px 16px; color: var(--ink);
+    font-family: var(--body); font-size: 14px; line-height: 1.6;
+    resize: vertical; transition: border-color 0.2s, background 0.2s; outline: none;
+    font-weight: 400;
+  }
+  textarea { min-height: 180px; }
+  textarea:focus, input:focus { border-color: var(--red); background: white; }
+  textarea::placeholder, input::placeholder { color: var(--ink3); }
+ 
+  .field { margin-bottom: 20px; }
+  .char-hint { font-family: var(--sans); font-size: 11px; color: var(--ink3); margin-top: 5px; }
+ 
+  /* Country selector */
+  .country-selector { position: relative; }
+ 
+  .country-trigger {
+    width: 100%; background: var(--cream); border: 1px solid var(--border2);
+    border-radius: 3px; padding: 11px 16px; color: var(--ink);
+    font-family: var(--body); font-size: 14px;
+    cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+    transition: border-color 0.2s; user-select: none;
+  }
+  .country-trigger:hover { border-color: var(--ink3); }
+  .country-trigger.open { border-color: var(--red); background: white; }
+  .country-trigger-text { color: var(--ink3); }
+  .country-trigger-text.has-selection { color: var(--ink); }
+  .country-chevron { font-size: 9px; color: var(--ink3); transition: transform 0.2s; flex-shrink: 0; margin-left: 8px; }
+  .country-trigger.open .country-chevron { transform: rotate(180deg); }
+ 
+  .country-dropdown {
+    display: none; position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+    background: white; border: 1px solid var(--border2);
+    border-radius: 4px; z-index: 50; max-height: 280px; overflow-y: auto;
+    box-shadow: 0 8px 32px rgba(26,22,18,0.14);
+  }
+  .country-dropdown.open { display: block; }
+ 
+  .country-search {
+    padding: 10px 12px; border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; background: white; z-index: 1;
+  }
+  .country-search input {
+    width: 100%; background: var(--cream); border: 1px solid var(--border);
+    border-radius: 3px; padding: 7px 12px; color: var(--ink);
+    font-family: var(--sans); font-size: 12px; outline: none;
+    transition: border-color 0.15s; text-transform: none; letter-spacing: 0;
+  }
+  .country-search input:focus { border-color: var(--red); }
+ 
+  .country-group-label {
+    font-family: var(--sans); font-size: 9px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase; color: var(--ink3);
+    padding: 10px 14px 4px;
+  }
+ 
+  .country-option {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 14px; cursor: pointer;
+    font-family: var(--body); font-size: 13px; color: var(--ink2);
+    transition: background 0.1s;
+  }
+  .country-option:hover { background: var(--cream); }
+  .country-option.selected { color: var(--red); background: var(--red-light); }
+  .country-option.disabled { opacity: 0.35; cursor: not-allowed; }
+  .country-option .co-flag { font-size: 16px; flex-shrink: 0; }
+  .country-option .co-check { margin-left: auto; font-size: 11px; color: var(--red); display: none; font-weight: 700; }
+  .country-option.selected .co-check { display: block; }
+ 
+  .country-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .country-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--red-light); border: 1px solid rgba(214,63,42,0.2);
+    color: var(--red); font-family: var(--sans); font-size: 11px; font-weight: 700;
+    letter-spacing: 0.3px; padding: 4px 10px; border-radius: 2px;
+  }
+  .country-tag-remove { cursor: pointer; color: var(--red); font-size: 14px; line-height: 1; opacity: 0.6; transition: opacity 0.15s; }
+  .country-tag-remove:hover { opacity: 1; }
+ 
+  .optional-hint { font-family: var(--sans); font-size: 11px; color: var(--ink3); margin-top: 6px; font-style: italic; }
+ 
+  .app-actions { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 4px; }
+ 
+  .btn-find {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--ink); color: var(--cream);
+    font-family: var(--sans); font-size: 13px; font-weight: 700;
+    letter-spacing: 1px; text-transform: uppercase;
+    padding: 13px 28px; border-radius: 3px; border: none; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-find:hover { background: var(--red); }
+  .btn-find:disabled { opacity: 0.4; cursor: not-allowed; }
+ 
+  .loading { display: none; align-items: center; gap: 12px; font-family: var(--sans); font-size: 12px; color: var(--ink3); letter-spacing: 0.5px; }
+  .loading.active { display: flex; }
+  .spinner { width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--red); border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+ 
+  .error-box { display: none; background: var(--red-light); border: 1px solid rgba(214,63,42,0.25); border-radius: 3px; padding: 12px 16px; font-family: var(--sans); font-size: 12px; color: var(--red); margin-top: 12px; letter-spacing: 0.2px; }
+  .error-box.active { display: block; }
+ 
+  /* Results */
+  #results-section { display: none; }
+  #results-section.active { display: block; }
+ 
+  .results-meta { font-family: var(--sans); font-size: 11px; color: var(--ink3); letter-spacing: 0.5px; margin-bottom: 16px; text-transform: uppercase; }
+  .results-meta strong { color: var(--ink); font-weight: 700; }
+ 
+  .job-list { display: flex; flex-direction: column; gap: 0; }
+ 
+  .job-card {
+    display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: start;
+    background: white; border-bottom: 1px solid var(--border);
+    padding: 24px 0;
+    transition: background 0.15s;
+    animation: fadeUp 0.3s ease both;
+  }
+  .job-card:first-child { border-top: 1px solid var(--border); }
+  .job-card:hover { background: var(--cream); }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+ 
+  .job-title { font-family: var(--sans); font-size: 17px; font-weight: 700; margin-bottom: 4px; color: var(--ink); letter-spacing: -0.2px; }
+  .job-meta { display: flex; gap: 14px; flex-wrap: wrap; font-family: var(--sans); font-size: 11px; color: var(--ink3); margin-bottom: 10px; letter-spacing: 0.3px; text-transform: uppercase; }
+  .job-reason { font-size: 13px; color: var(--ink3); font-style: italic; line-height: 1.6; margin-bottom: 14px; font-family: var(--body); font-weight: 300; }
+  .job-date { font-size: 11px; color: var(--ink3); font-family: var(--sans); }
+  .job-date-stale { color: #b45309; }
+  .job-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+ 
+  .btn-ghost {
+    background: transparent; border: 1px solid var(--border2); color: var(--ink2);
+    font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
+    text-transform: uppercase; padding: 7px 16px; border-radius: 2px;
+    cursor: pointer; transition: all 0.15s; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-ghost:hover { border-color: var(--ink); color: var(--ink); }
+  .btn-ghost-accent { background: var(--red); border-color: var(--red); color: white; }
+  .btn-ghost-accent:hover { background: var(--red2); border-color: var(--red2); color: white; }
+ 
+  .match-block { text-align: right; flex-shrink: 0; padding-top: 4px; }
+  .match-pct { font-family: var(--serif); font-size: 32px; font-weight: 900; color: var(--ink); line-height: 1; letter-spacing: -1px; }
+  .match-lbl { font-family: var(--sans); font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--ink3); margin-top: 2px; }
+  .match-bar { width: 56px; height: 2px; background: var(--border); margin-top: 8px; overflow: hidden; margin-left: auto; }
+  .match-fill { height: 100%; background: var(--red); }
+ 
+  /* ── CTA ── */
+ 
+  .btn-main-white {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: white; color: var(--red);
+    font-family: var(--sans); font-size: 13px; font-weight: 800;
+    letter-spacing: 1px; text-transform: uppercase;
+    padding: 16px 36px; border-radius: 3px; border: none;
+    cursor: pointer; text-decoration: none; transition: all 0.2s;
+  }
+  .btn-main-white:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+  .hero-sub-white { font-family: var(--body); font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 14px; }
+ 
+  /* ── MODAL ── */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(26,22,18,0.75); z-index: 200; padding: 24px; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
+  .modal-overlay.active { display: flex; }
+  .modal { background: white; border: 1px solid var(--border2); border-radius: 4px; width: 100%; max-width: 640px; max-height: 85vh; display: flex; flex-direction: column; animation: mIn 0.2s ease; box-shadow: 0 24px 64px rgba(26,22,18,0.25); }
+  @keyframes mIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+  .modal-hd { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+  .modal-title { font-family: var(--sans); font-size: 14px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--ink); }
+  .modal-close { background: none; border: none; color: var(--ink3); font-size: 22px; cursor: pointer; padding: 2px 6px; transition: color 0.15s; line-height: 1; }
+  .modal-close:hover { color: var(--ink); }
+  .modal-body { padding: 24px; overflow-y: auto; flex: 1; }
+  .modal-for { font-family: var(--sans); font-size: 11px; color: var(--ink3); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .cover-text { font-size: 15px; line-height: 1.85; color: var(--ink); white-space: pre-wrap; font-family: var(--body); font-weight: 300; }
+  .modal-loading { display: flex; align-items: center; gap: 12px; font-family: var(--sans); font-size: 12px; color: var(--ink3); padding: 16px 0; letter-spacing: 0.5px; }
+  .modal-ft { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
+  .btn-copy { background: var(--ink); border: none; color: var(--cream); font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 10px 22px; border-radius: 3px; cursor: pointer; transition: all 0.15s; }
+  .btn-copy:hover { background: var(--red); }
+  .copy-ok { font-family: var(--sans); font-size: 11px; color: #2a9d2a; display: none; font-weight: 700; letter-spacing: 0.5px; }
+ 
+  /* ── FOOTER ── */
+  footer { background: var(--ink); padding: 28px 40px; display: flex; justify-content: space-between; align-items: center; font-family: var(--sans); font-size: 12px; color: rgba(240,235,225,0.4); letter-spacing: 0.3px; }
+  footer a { color: rgba(240,235,225,0.4); text-decoration: underline; transition: color 0.15s; }
+  footer a:hover { color: var(--cream); }
+  footer strong { color: rgba(240,235,225,0.7); }
+ 
+  /* ── RESPONSIVE ── */
+  @media(max-width:900px){
+    .hero-inner { grid-template-columns: 1fr; }
+    .hero-right { display: none; }
+    .pain-inner { grid-template-columns: 1fr; gap: 48px; }
+    .pain-hd { position: static; }
+    .features-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media(max-width:700px){
+    nav { padding: 0 20px; }
+    .container { padding: 0 20px; }
+    .hero { padding: 100px 0 0; }
+    .hero h1 { font-size: 36px; }
+    .steps-grid { grid-template-columns: 1fr; gap: 1px; }
+    .features-grid { grid-template-columns: 1fr; }
+    .app-step { padding: 24px 20px; }
+    .job-card { grid-template-columns: 1fr; }
+    .match-block { text-align: left; display: flex; align-items: center; gap: 14px; }
+    .match-bar { margin-left: 0; }
+    footer { flex-direction: column; gap: 10px; text-align: center; padding: 24px 20px; }
+    .nav-pill { display: none; }
+  }
+</style>
+</head>
+<body>
+ 
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">Hire<span>EU</span></a>
+  <div class="nav-right">
+    <span class="nav-pill">Beta</span>
+    <a href="#how-it-works" class="nav-link">How it works</a>
+  </div>
+</nav>
+ 
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-inner">
+      <div class="hero-left">
+        <div class="hero-eyebrow">AI Job Assistant for Foreigners</div>
+        <h1>Job hunting in Poland as a foreigner is <em>broken.</em> We're fixing it.</h1>
+        <p class="hero-desc">Upload your CV and let AI match you with jobs, write your cover letter, and alert you when the right role appears — all tailored for the Polish and EU job market.</p>
+        <div class="hero-cta">
+          <a href="#app" class="btn-main">Try it now →</a>
+          <span class="hero-sub">Free · No account needed</span>
+        </div>
+      </div>
+      <div class="hero-right">
+        <div class="hero-stat">
+          <div class="hero-stat-num">27+</div>
+          <div class="hero-stat-label">EU countries covered</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-num">3s</div>
+          <div class="hero-stat-label">to match your CV</div>
+        </div>
+        <div class="hero-tagline">"Your CV, matched to the right EU job — instantly."</div>
+      </div>
+    </div>
+  </div>
+</section>
+ 
+<!-- FLAGS -->
+<div class="flags-strip">
+  <div class="container">
+    <div class="flags-inner">
+      <div class="flags-label">Built for</div>
+      <div class="flags-row">
+        <div class="flag-item"><span class="fi">🇺🇦</span> Ukraine</div>
+        <div class="flag-item"><span class="fi">🇮🇳</span> India</div>
+        <div class="flag-item"><span class="fi">🇧🇷</span> Brazil</div>
+        <div class="flag-item"><span class="fi">🇵🇭</span> Philippines</div>
+        <div class="flag-item"><span class="fi">🇳🇬</span> Nigeria</div>
+        <div class="flag-item"><span class="fi">🇻🇳</span> Vietnam</div>
+        <span class="flag-more">+ many more</span>
+      </div>
+    </div>
+  </div>
+</div>
+ 
+<!-- HOW IT WORKS -->
+<section id="how-it-works">
+  <div class="container">
+    <div class="how-header">
+      <div class="eyebrow">How it works</div>
+      <div class="sec-title">Three steps to your next job in Poland</div>
+      <p class="sec-sub">No language barrier. No guessing which companies hire foreigners. Just results.</p>
+    </div>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-num">01</div>
+        <span class="step-icon">📄</span>
+        <h3>Upload your CV</h3>
+        <p>We analyze your skills, experience, and target role — then prepare your profile for the Polish and EU job market automatically.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">02</div>
+        <span class="step-icon">🎯</span>
+        <h3>Get matched</h3>
+        <p>See your match % against real job listings with visa sponsorship flags, salary ranges, and relocation support indicators.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">03</div>
+        <span class="step-icon">✉️</span>
+        <h3>Apply smarter</h3>
+        <p>Get a tailored cover letter in the right local tone — before anyone else sees the posting.</p>
+      </div>
+    </div>
+  </div>
+</section>
+ 
+<!-- PAIN POINTS -->
+<section class="pain-section">
+  <div class="container">
+    <div class="pain-inner">
+      <div class="pain-hd">
+        <div class="eyebrow">Sound familiar?</div>
+        <div class="sec-title">The frustrations every foreign job seeker in Poland knows.</div>
+        <p class="sec-sub">You're not alone. These are the exact problems we're built to solve.</p>
+      </div>
+      <div class="pain-list">
+        <div class="pain-item"><span class="pain-icon">🏢</span><p>You don't know which Polish companies actually sponsor work permits</p></div>
+        <div class="pain-item"><span class="pain-icon">🌐</span><p>Pracuj.pl is in Polish and nearly impossible to navigate as a foreigner</p></div>
+        <div class="pain-item"><span class="pain-icon">📋</span><p>Your CV format doesn't match local expectations and gets filtered out</p></div>
+        <div class="pain-item"><span class="pain-icon">✍️</span><p>Writing cover letters in an unfamiliar language and professional tone is exhausting</p></div>
+        <div class="pain-item"><span class="pain-icon">⏳</span><p>You apply to dozens of roles and hear nothing back for weeks</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+ 
+<!-- FEATURES -->
+<section class="features-section">
+  <div class="container">
+    <div class="features-hd">
+      <div class="eyebrow">What you get</div>
+      <div class="sec-title" style="color:var(--cream)">Everything in one place</div>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card"><span class="feature-icon">🔍</span><h4>Visa-Friendly Job Finder</h4><p>Every listing is tagged: does this employer sponsor work permits? Oświadczenie, Blue Card, or full relocation support?</p></div>
+      <div class="feature-card"><span class="feature-icon">🤖</span><h4>AI Cover Letter Writer</h4><p>Generates a professional, culturally-appropriate cover letter in Polish or English — tailored to the specific job and company.</p></div>
+      <div class="feature-card"><span class="feature-icon">📊</span><h4>CV Match Score</h4><p>See exactly how well your experience matches each role before you apply. Know which applications are worth your time.</p></div>
+      <div class="feature-card"><span class="feature-icon">🔔</span><h4>Smart Job Alerts</h4><p>Set your criteria once. Get notified the moment a matching role opens — days before most applicants even see it.</p></div>
+      <div class="feature-card"><span class="feature-icon">🗺️</span><h4>Relocation Guide</h4><p>Understand the Polish job market: average salaries, popular cities, industry hotspots, and legal work requirements.</p></div>
+      <div class="feature-card"><span class="feature-icon">💬</span><h4>Interview Prep</h4><p>Practice common Polish interview questions and learn the local professional etiquette to walk in with confidence.</p></div>
+    </div>
+  </div>
+</section>
+ 
+<!-- APP TOOL -->
+<section class="app-section" id="app">
+  <div class="container">
+    <div class="app-hd">
+      <div class="eyebrow">Try it now</div>
+      <div class="sec-title">Find jobs that fit your CV</div>
+      <p class="sec-sub">Paste your CV, enter a role — get AI-scored matches and one-click cover letters.</p>
+    </div>
+ 
+    <div class="app-card">
+      <div class="app-step">
+        <div class="step-label-inner">Step 01 — Your CV &amp; Target Role</div>
+        <div class="field">
+          <label>Upload CV <small>PDF, DOCX, or TXT</small></label>
+          <div class="upload-zone" id="upload-zone" onclick="document.getElementById('cv-file').click()" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+            <input type="file" id="cv-file" accept=".pdf,.docx,.doc,.txt" style="display:none" onchange="onFileSelect(event)">
+            <div id="upload-placeholder">
+              <span class="upload-icon">📄</span>
+              <span class="upload-text">Drop your CV here or <span class="upload-link">browse</span></span>
+              <span class="upload-hint">PDF, DOCX, or TXT — max 5MB</span>
+            </div>
+            <div id="upload-selected" style="display:none">
+              <span class="upload-icon">✅</span>
+              <span class="upload-filename" id="upload-filename"></span>
+              <span class="upload-change">Change file</span>
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Target Role <small>what kind of job are you looking for?</small></label>
+          <input type="text" id="role-input" placeholder="e.g. Frontend Developer, Data Analyst, Marketing Manager">
+        </div>
+        <div class="field">
+          <label>Countries <small>optional — narrow results to specific countries</small></label>
+          <div class="country-selector" id="country-selector">
+            <div class="country-trigger" id="country-trigger" onclick="toggleDropdown()">
+              <span class="country-trigger-text" id="trigger-text">Any EU country (or select up to 3)</span>
+              <span class="country-chevron">▼</span>
+            </div>
+            <div class="country-dropdown" id="country-dropdown">
+              <div class="country-search">
+                <input type="text" id="country-search-input" placeholder="Search countries..." oninput="filterCountries(this.value)" onclick="event.stopPropagation()">
+              </div>
+              <div id="country-list"></div>
+            </div>
+          </div>
+          <div class="country-tags" id="country-tags"></div>
+          <div class="optional-hint">Leave blank to search across all of Europe</div>
+        </div>
+        <div class="app-actions">
+          <button class="btn-find" id="find-btn" onclick="findJobs()">Find Matching Jobs →</button>
+          <div class="loading" id="main-loading">
+            <div class="spinner"></div>
+            <span id="loading-msg">Analysing CV...</span>
+          </div>
+        </div>
+        <div class="error-box" id="main-error"></div>
+      </div>
+ 
+      <div id="results-section">
+        <div class="app-step" style="padding-bottom:8px">
+          <div class="step-label-inner">Step 02 — Your Matches</div>
+          <div class="results-meta" id="results-meta"></div>
+          <div class="job-list" id="job-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+ 
+<!-- CTA -->
+<!-- FOOTER -->
+<footer>
+  <div>© 2026 <strong>HireEU</strong> — Helping foreigners find their place in Poland &amp; the EU.</div>
+  <div><a href="/privacy.html">Privacy Policy</a></div>
+</footer>
+ 
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-title">Cover Letter</div>
+      <button class="modal-close" onclick="closeModalDirect()">×</button>
+    </div>
+    <div class="modal-body" id="modal-body">
+      <div class="modal-loading"><div class="spinner"></div><span>Writing your cover letter...</span></div>
+    </div>
+    <div class="modal-ft" id="modal-ft" style="display:none">
+      <button class="btn-copy" onclick="copyCL()">Copy to Clipboard</button>
+      <span class="copy-ok" id="copy-ok">Copied ✓</span>
+    </div>
+  </div>
+</div>
+ 
+<script>
+  let candidateSummary = '';
+  let currentCL = '';
+  let jobsStore = [];
+ 
+  // ── Country selector ──
+  const EU_COUNTRIES = [
+    { code: 'PL', name: 'Poland',         flag: '🇵🇱', priority: true },
+    { code: 'DE', name: 'Germany',        flag: '🇩🇪', priority: true },
+    { code: 'FR', name: 'France',         flag: '🇫🇷', priority: true },
+    { code: 'IT', name: 'Italy',          flag: '🇮🇹', priority: true },
+    { code: 'ES', name: 'Spain',          flag: '🇪🇸', priority: true },
+    { code: 'AT', name: 'Austria',        flag: '🇦🇹', priority: false },
+    { code: 'NL', name: 'Netherlands',    flag: '🇳🇱', priority: false },
+    { code: 'GB', name: 'United Kingdom', flag: '🇬🇧', priority: false },
+  ];
+ 
+  const MAX_COUNTRIES = 3;
+  let selectedCountries = [];
+ 
+  function buildCountryList(filter = '') {
+    const list = document.getElementById('country-list');
+    const q = filter.toLowerCase();
+    const filtered = EU_COUNTRIES.filter(c => c.name.toLowerCase().includes(q));
+    const priority = filtered.filter(c => c.priority);
+    const rest = filtered.filter(c => !c.priority);
+    list.innerHTML = '';
+ 
+    function renderGroup(label, items) {
+      if (!items.length) return;
+      if (label) {
+        const g = document.createElement('div');
+        g.className = 'country-group-label';
+        g.textContent = label;
+        list.appendChild(g);
+      }
+      items.forEach(c => {
+        const isSelected = selectedCountries.some(s => s.code === c.code);
+        const isDisabled = !isSelected && selectedCountries.length >= MAX_COUNTRIES;
+        const el = document.createElement('div');
+        el.className = 'country-option' + (isSelected ? ' selected' : '') + (isDisabled ? ' disabled' : '');
+        el.innerHTML = `<span class="co-flag">${c.flag}</span><span>${c.name}</span><span class="co-check">✓</span>`;
+        if (!isDisabled) el.onclick = (e) => { e.stopPropagation(); toggleCountry(c); };
+        list.appendChild(el);
+      });
+    }
+ 
+    renderGroup(filter ? '' : 'Popular', priority);
+    renderGroup(filter ? '' : 'All EU + EEA', rest);
+  }
+ 
+  function toggleCountry(country) {
+    const idx = selectedCountries.findIndex(c => c.code === country.code);
+    if (idx > -1) { selectedCountries.splice(idx, 1); }
+    else { if (selectedCountries.length >= MAX_COUNTRIES) return; selectedCountries.push(country); }
+    updateCountryUI();
+    buildCountryList(document.getElementById('country-search-input').value);
+  }
+ 
+  function removeCountry(code) {
+    selectedCountries = selectedCountries.filter(c => c.code !== code);
+    updateCountryUI();
+    buildCountryList(document.getElementById('country-search-input').value);
+  }
+ 
+  function updateCountryUI() {
+    const trigger = document.getElementById('trigger-text');
+    if (selectedCountries.length === 0) {
+      trigger.textContent = 'Any EU country (or select up to 3)';
+      trigger.className = 'country-trigger-text';
+    } else {
+      trigger.textContent = selectedCountries.map(c => `${c.flag} ${c.name}`).join(', ');
+      trigger.className = 'country-trigger-text has-selection';
+    }
+    const tags = document.getElementById('country-tags');
+    tags.innerHTML = '';
+    selectedCountries.forEach(c => {
+      const tag = document.createElement('div');
+      tag.className = 'country-tag';
+      tag.innerHTML = `${c.flag} ${c.name}<span class="country-tag-remove" onclick="removeCountry('${c.code}')">×</span>`;
+      tags.appendChild(tag);
+    });
+  }
+ 
+  function toggleDropdown() {
+    const trigger = document.getElementById('country-trigger');
+    const dropdown = document.getElementById('country-dropdown');
+    if (dropdown.classList.contains('open')) { closeDropdown(); }
+    else { trigger.classList.add('open'); dropdown.classList.add('open'); setTimeout(() => document.getElementById('country-search-input').focus(), 50); }
+  }
+ 
+  function closeDropdown() {
+    document.getElementById('country-trigger').classList.remove('open');
+    document.getElementById('country-dropdown').classList.remove('open');
+    document.getElementById('country-search-input').value = '';
+    buildCountryList();
+  }
+ 
+  function filterCountries(val) { buildCountryList(val); }
+ 
+  document.addEventListener('click', (e) => {
+    if (!document.getElementById('country-selector').contains(e.target)) closeDropdown();
+  });
+ 
+  buildCountryList();
+ 
+  // ── Loading messages ──
+  const msgs = ['Analysing CV...', 'Extracting keywords...', 'Searching job listings...', 'Scoring matches...'];
+  let msgInt;
+  function startMsgs(){ let i=0; document.getElementById('loading-msg').textContent=msgs[0]; msgInt=setInterval(()=>{i=(i+1)%msgs.length;document.getElementById('loading-msg').textContent=msgs[i];},2200); }
+  function stopMsgs(){ clearInterval(msgInt); }
+ 
+  // ── Main flow ──
+  // ── File upload handling ──
+  let selectedFile = null;
+ 
+  function onFileSelect(e) {
+    const file = e.target.files[0];
+    if (file) setFile(file);
+  }
+ 
+  function onDragOver(e) {
+    e.preventDefault();
+    document.getElementById('upload-zone').classList.add('drag-over');
+  }
+ 
+  function onDragLeave(e) {
+    document.getElementById('upload-zone').classList.remove('drag-over');
+  }
+ 
+  function onDrop(e) {
+    e.preventDefault();
+    document.getElementById('upload-zone').classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) setFile(file);
+  }
+ 
+  function setFile(file) {
+    const allowed = ['application/pdf',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/msword', 'text/plain'];
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (!allowed.includes(file.type) && !['pdf','docx','doc','txt'].includes(ext)) {
+      showErr('Unsupported file type. Please upload PDF, DOCX, or TXT.'); return;
+    }
+    if (file.size > 5 * 1024 * 1024) { showErr('File too large — max 5MB.'); return; }
+    selectedFile = file;
+    clearErr();
+    document.getElementById('upload-placeholder').style.display = 'none';
+    document.getElementById('upload-selected').style.display = 'block';
+    document.getElementById('upload-filename').textContent = file.name;
+  }
+ 
+  function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+ 
+  // ── Main flow ──
+  async function findJobs(){
+    const role=document.getElementById('role-input').value.trim();
+    if(!selectedFile){showErr('Please upload your CV.');return;}
+    if(!role){showErr('Please enter a target role.');return;}
+    clearErr(); setLoading(true);
+    document.getElementById('results-section').classList.remove('active');
+    try{
+      const fileBase64 = await fileToBase64(selectedFile);
+      const fileType = selectedFile.type || 'application/octet-stream';
+ 
+      const p=await fetch('/api/parse-cv',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({fileBase64, fileType, role})});
+      if(!p.ok) throw new Error(await p.text());
+      const parsed=await p.json();
+      candidateSummary=parsed.summary;
+ 
+      const countryNames = selectedCountries.map(c => c.name);
+      const s=await fetch('/api/search-jobs',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({query:parsed.searchQuery,countries:countryNames})});
+      if(!s.ok) throw new Error(await s.text());
+      const {jobs}=await s.json();
+      if(!jobs?.length) throw new Error('No jobs found. Try a broader role title.');
+ 
+      const m=await fetch('/api/match-and-score',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({summary:candidateSummary, skills:parsed.skills, yearsExperience:parsed.yearsExperience, jobs})});
+      if(!m.ok) throw new Error(await m.text());
+      const {scored}=await m.json();
+      renderResults(scored,role);
+    }catch(e){showErr(e.message||'Something went wrong. Please try again.');}
+    finally{setLoading(false);}
+  }
+ 
+  function renderResults(scored, role){
+    const MIN_MATCH = 60;
+    const qualified = scored
+      .filter(j => j.match >= MIN_MATCH)
+      .sort((a,b) => b.match - a.match);
+ 
+    jobsStore = qualified;
+    const list = document.getElementById('job-list');
+    list.innerHTML = '';
+ 
+    if (qualified.length === 0) {
+      document.getElementById('results-meta').innerHTML =
+        `No jobs above <strong>${MIN_MATCH}% match</strong> found for "${role}". Try a different role title or select different countries.`;
+      document.getElementById('results-section').classList.add('active');
+      document.getElementById('results-section').scrollIntoView({behavior:'smooth',block:'start'});
+      return;
+    }
+ 
+    document.getElementById('results-meta').innerHTML =
+      `<strong>${qualified.length} job${qualified.length!==1?'s':''}</strong> above ${MIN_MATCH}% match for "${role}"`;
+ 
+    qualified.forEach((job, i) => {
+      const c = document.createElement('div');
+      c.className = 'job-card';
+      c.style.animationDelay = `${i*55}ms`;
+ 
+      // Posted date + staleness
+      let dateHtml = '';
+      if (job.postedAt) {
+        const days = Math.floor((Date.now() - new Date(job.postedAt)) / 86400000);
+        const stale = days > 14;
+        dateHtml = `<span class="job-date ${stale ? 'job-date-stale' : ''}">${stale ? '⚠️ ' : ''}${days === 0 ? 'Today' : days === 1 ? '1 day ago' : `${days} days ago`}</span>`;
+      }
+ 
+      c.innerHTML = `
+        <div>
+          <div class="job-title">${esc(job.title)}</div>
+          <div class="job-meta">
+            <span>${esc(job.company)}</span>
+            <span>${esc(job.location)}</span>
+            ${job.type ? `<span>${esc(job.type)}</span>` : ''}
+            ${dateHtml}
+          </div>
+          <div class="job-reason">${esc(job.reason)}</div>
+          <div class="job-btns">
+            <button class="btn-ghost btn-ghost-accent" onclick="openCL(${i})">✉️ Cover Letter</button>
+            ${job.applyUrl ? `<a href="${esc(job.applyUrl)}" target="_blank" rel="noopener" class="btn-ghost">View Job →</a>` : ''}
+          </div>
+        </div>
+        <div class="match-block">
+          <div class="match-pct">${job.match}%</div>
+          <div class="match-lbl">match</div>
+          <div class="match-bar"><div class="match-fill" style="width:${job.match}%"></div></div>
+        </div>`;
+      list.appendChild(c);
+    });
+ 
+    document.getElementById('results-section').classList.add('active');
+    document.getElementById('results-section').scrollIntoView({behavior:'smooth',block:'start'});
+  }
+ 
+  async function openCL(index){
+    const job=jobsStore[index];
+    if(!job) return;
+    openModal(); currentCL=''; document.getElementById('modal-ft').style.display='none';
+    try{
+      const r=await fetch('/api/generate-cover-letter',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({summary:candidateSummary,job})});
+      if(!r.ok) throw new Error(await r.text());
+      const {letter}=await r.json();
+      currentCL=letter;
+      document.getElementById('modal-body').innerHTML=`<div class="modal-for">For: ${esc(job.title)} at ${esc(job.company)}</div><div class="cover-text">${esc(letter)}</div>`;
+      document.getElementById('modal-ft').style.display='flex';
+    }catch(e){document.getElementById('modal-body').innerHTML=`<div style="color:var(--red);font-family:var(--sans);font-size:12px">Error: ${esc(e.message)}</div>`;}
+  }
+ 
+  function openModal(){
+    document.getElementById('modal-body').innerHTML=`<div class="modal-loading"><div class="spinner"></div><span>Writing your cover letter...</span></div>`;
+    document.getElementById('modal-overlay').classList.add('active');
+    document.body.style.overflow='hidden';
+  }
+  function closeModal(e){ if(e.target===document.getElementById('modal-overlay')) closeModalDirect(); }
+  function closeModalDirect(){ document.getElementById('modal-overlay').classList.remove('active'); document.body.style.overflow=''; }
+ 
+  function copyCL(){
+    if(!currentCL) return;
+    navigator.clipboard.writeText(currentCL).then(()=>{
+      const el=document.getElementById('copy-ok'); el.style.display='inline';
+      setTimeout(()=>el.style.display='none',2000);
+    });
+  }
+ 
+  function setLoading(on){
+    document.getElementById('find-btn').disabled=on;
+    const el=document.getElementById('main-loading');
+    if(on){el.classList.add('active');startMsgs();}else{el.classList.remove('active');stopMsgs();}
+  }
+  function showErr(msg){ const e=document.getElementById('main-error'); e.textContent=msg; e.classList.add('active'); }
+  function clearErr(){ const e=document.getElementById('main-error'); e.textContent=''; e.classList.remove('active'); }
+  function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModalDirect(); });
+</script>
+</body>
+</html>
