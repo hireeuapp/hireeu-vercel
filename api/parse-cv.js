@@ -1,33 +1,33 @@
 // /api/parse-cv.js
 // Accepts file upload (PDF, DOCX, TXT) or plain text
 // Deps: pdf-parse, mammoth (in package.json)
- 
+
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
- 
+
 async function extractText(fileBase64, fileType) {
   const buffer = Buffer.from(fileBase64, 'base64');
   const type = fileType.toLowerCase();
- 
+
   if (type.includes('pdf')) {
     const pdfParse = require('pdf-parse');
     const result = await pdfParse(buffer);
     return result.text || '';
   }
- 
+
   if (type.includes('docx') || type.includes('wordprocessingml') || type.includes('word')) {
     const mammoth = require('mammoth');
     const result = await mammoth.extractRawText({ buffer });
     return result.value || '';
   }
- 
+
   if (type.includes('text') || type.includes('txt')) {
     return buffer.toString('utf-8');
   }
- 
+
   throw new Error('Unsupported file type. Please upload a PDF, DOCX, or TXT file.');
 }
- 
+
 async function callGroq(prompt, maxTokens = 500) {
   const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
@@ -46,15 +46,15 @@ async function callGroq(prompt, maxTokens = 500) {
   const data = await response.json();
   return data.choices?.[0]?.message?.content || '';
 }
- 
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
- 
+
   const { cv, role, fileBase64, fileType } = req.body;
   if (!role) return res.status(400).json({ error: 'Missing role' });
- 
+
   let cvText = '';
- 
+
   if (fileBase64 && fileType) {
     try {
       cvText = await extractText(fileBase64, fileType);
@@ -69,14 +69,14 @@ export default async function handler(req, res) {
   } else {
     return res.status(400).json({ error: 'No CV provided.' });
   }
- 
+
   const prompt = `You are a CV parser. Extract structured information from this CV.
- 
+
 TARGET ROLE: ${role}
- 
+
 CV TEXT:
 ${cvText.slice(0, 8000)}
- 
+
 Respond ONLY with a JSON object, no markdown, no explanation:
 {
   "summary": "2-3 sentence summary: seniority level, key skills, years of experience, domain",
@@ -84,7 +84,7 @@ Respond ONLY with a JSON object, no markdown, no explanation:
   "yearsExperience": 2,
   "location": "city if clearly mentioned, otherwise null"
 }`;
- 
+
   try {
     const text = await callGroq(prompt, 500);
     let parsed;
@@ -94,7 +94,7 @@ Respond ONLY with a JSON object, no markdown, no explanation:
       console.error('CV parse error, raw:', text);
       return res.status(502).json({ error: 'Failed to parse CV. Please try again.' });
     }
- 
+
     return res.status(200).json({
       summary: parsed.summary,
       skills: parsed.skills || [],
@@ -102,7 +102,7 @@ Respond ONLY with a JSON object, no markdown, no explanation:
       searchQuery: role.trim(),
       location: parsed.location || null
     });
- 
+
   } catch (err) {
     console.error('parse-cv error:', err.message);
     return res.status(500).json({ error: err.message });
