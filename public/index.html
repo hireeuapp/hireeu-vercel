@@ -932,27 +932,21 @@
   }
 
   function renderResults(scored, role){
-    const MIN_MATCH = 60;
-    const qualified = scored
-      .filter(j => j.match >= MIN_MATCH)
-      .sort((a,b) => b.match - a.match);
-
-    jobsStore = qualified;
+    jobsStore = scored.sort((a,b) => b.match - a.match);
     const list = document.getElementById('job-list');
     list.innerHTML = '';
 
-    if (qualified.length === 0) {
-      document.getElementById('results-meta').innerHTML =
-        `No jobs above <strong>${MIN_MATCH}% match</strong> found for "${role}". Try a different role title or select different countries.`;
+    if (jobsStore.length === 0) {
+      document.getElementById('results-meta').innerHTML = `No jobs found for "${role}". Try a different role title or select different countries.`;
       document.getElementById('results-section').classList.add('active');
       document.getElementById('results-section').scrollIntoView({behavior:'smooth',block:'start'});
       return;
     }
 
     document.getElementById('results-meta').innerHTML =
-      `<strong>${qualified.length} job${qualified.length!==1?'s':''}</strong> above ${MIN_MATCH}% match for "${role}"`;
+      `<strong>${jobsStore.length} job${jobsStore.length!==1?'s':''}</strong> found for "${role}" — sorted by match`;
 
-    qualified.forEach((job, i) => {
+    jobsStore.forEach((job, i) => {
       const c = document.createElement('div');
       c.className = 'job-card';
       c.style.animationDelay = `${i*55}ms`;
