@@ -24,10 +24,10 @@
     --sans: 'Syne', sans-serif;
     --body: 'Mulish', sans-serif;
   }
- 
+
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
- 
+
   body {
     font-family: var(--body);
     background: var(--cream);
@@ -36,7 +36,7 @@
     line-height: 1.7;
     overflow-x: hidden;
   }
- 
+
   /* ── NAV ── */
   nav {
     position: fixed; top: 0; left: 0; right: 0; z-index: 100;
@@ -44,31 +44,31 @@
     height: 60px; padding: 0 40px;
     display: flex; align-items: center; justify-content: space-between;
   }
- 
+
   .nav-logo {
     font-family: var(--sans); font-size: 20px; font-weight: 800;
     color: var(--cream); text-decoration: none; letter-spacing: -0.5px;
   }
   .nav-logo span { color: var(--red2); }
- 
+
   .nav-right { display: flex; align-items: center; gap: 24px; }
- 
+
   .nav-pill {
     font-family: var(--sans); font-size: 10px; font-weight: 700;
     letter-spacing: 1.5px; text-transform: uppercase;
     color: var(--ink); background: var(--gold);
     padding: 4px 12px; border-radius: 2px;
   }
- 
+
   .nav-link {
     font-family: var(--sans); font-size: 13px; font-weight: 500;
     color: rgba(240,235,225,0.6); text-decoration: none; transition: color 0.2s;
   }
   .nav-link:hover { color: var(--cream); }
- 
+
   /* ── LAYOUT ── */
   .container { max-width: 1100px; margin: 0 auto; padding: 0 32px; }
- 
+
   /* ── HERO ── */
   .hero {
     padding: 130px 0 0;
@@ -76,7 +76,7 @@
     overflow: hidden;
     position: relative;
   }
- 
+
   .hero-inner {
     display: grid;
     grid-template-columns: 1fr 420px;
@@ -84,9 +84,9 @@
     align-items: end;
     min-height: 480px;
   }
- 
+
   .hero-left { padding: 40px 0 60px; }
- 
+
   .hero-eyebrow {
     font-family: var(--sans); font-size: 11px; font-weight: 700;
     letter-spacing: 3px; text-transform: uppercase;
@@ -94,25 +94,25 @@
     display: flex; align-items: center; gap: 10px;
   }
   .hero-eyebrow::before { content: ''; width: 32px; height: 1px; background: var(--gold); }
- 
+
   .hero h1 {
     font-family: var(--serif); font-size: clamp(42px, 5.5vw, 72px);
     font-weight: 900; line-height: 1.05; letter-spacing: -1px;
     color: var(--cream); margin-bottom: 28px;
   }
- 
+
   .hero h1 em {
     font-style: italic; color: var(--red2);
   }
- 
+
   .hero-desc {
     font-size: 17px; color: rgba(240,235,225,0.65);
     max-width: 480px; line-height: 1.75; margin-bottom: 40px;
     font-weight: 300;
   }
- 
+
   .hero-cta { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
- 
+
   .btn-main {
     display: inline-flex; align-items: center; gap: 10px;
     background: var(--red); color: white;
@@ -123,9 +123,9 @@
   }
   .btn-main:hover { background: var(--red2); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(214,63,42,0.4); }
   .btn-main:active { transform: none; }
- 
+
   .hero-sub { font-family: var(--body); font-size: 12px; color: rgba(240,235,225,0.4); }
- 
+
   .hero-right {
     background: var(--red);
     align-self: stretch;
@@ -134,7 +134,7 @@
     position: relative;
     overflow: hidden;
   }
- 
+
   .hero-right::before {
     content: '';
     position: absolute; top: -60px; right: -60px;
@@ -149,7 +149,7 @@
     border: 1px solid rgba(255,255,255,0.1);
     border-radius: 50%;
   }
- 
+
   .hero-stat {
     margin-bottom: 28px; position: relative; z-index: 1;
   }
@@ -162,13 +162,13 @@
     letter-spacing: 2px; text-transform: uppercase;
     color: rgba(255,255,255,0.6); margin-top: 4px;
   }
- 
+
   .hero-tagline {
     font-family: var(--serif); font-size: 20px; font-style: italic;
     color: rgba(255,255,255,0.85); line-height: 1.4;
     position: relative; z-index: 1;
   }
- 
+
   /* ── FLAGS STRIP ── */
   .flags-strip {
     background: var(--cream2);
@@ -192,7 +192,7 @@
   }
   .flag-item .fi { font-size: 18px; }
   .flag-more { font-family: var(--body); font-size: 12px; color: var(--ink3); }
- 
+
   /* ── SECTION HEADERS ── */
   .eyebrow {
     font-family: var(--sans); font-size: 10px; font-weight: 700;
@@ -200,26 +200,26 @@
     margin-bottom: 16px; display: flex; align-items: center; gap: 10px;
   }
   .eyebrow::before { content: ''; width: 20px; height: 2px; background: var(--red); }
- 
+
   .sec-title {
     font-family: var(--serif); font-size: clamp(28px, 3.5vw, 44px);
     font-weight: 900; line-height: 1.1; letter-spacing: -0.5px;
     color: var(--ink); margin-bottom: 16px;
   }
   .sec-sub { font-size: 16px; color: var(--ink3); max-width: 500px; line-height: 1.7; font-weight: 300; }
- 
+
   /* ── HOW IT WORKS ── */
   #how-it-works { padding: 100px 0; background: var(--cream); }
   .how-header { margin-bottom: 64px; }
- 
+
   .steps-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); }
- 
+
   .step-card {
     background: var(--surface); padding: 40px 32px;
     transition: background 0.2s;
   }
   .step-card:hover { background: var(--cream); }
- 
+
   .step-num {
     font-family: var(--serif); font-size: 48px; font-weight: 900;
     color: var(--cream2); line-height: 1; margin-bottom: 20px;
@@ -228,12 +228,12 @@
   .step-icon { font-size: 28px; margin-bottom: 16px; display: block; }
   .step-card h3 { font-family: var(--sans); font-size: 18px; font-weight: 700; margin-bottom: 12px; color: var(--ink); }
   .step-card p { font-size: 14px; color: var(--ink3); line-height: 1.7; font-weight: 300; }
- 
+
   /* ── PAIN POINTS ── */
   .pain-section { padding: 0 0 100px; background: var(--cream); }
   .pain-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
   .pain-hd { position: sticky; top: 80px; }
- 
+
   .pain-list { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--border); }
   .pain-item {
     display: flex; gap: 16px; align-items: flex-start;
@@ -244,16 +244,16 @@
   .pain-item:hover { background: var(--red-light); }
   .pain-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
   .pain-item p { font-size: 14px; color: var(--ink2); line-height: 1.6; font-weight: 400; }
- 
+
   /* ── FEATURES ── */
   .features-section { padding: 100px 0; background: var(--ink); }
   .features-hd { margin-bottom: 60px; }
   .features-hd .eyebrow { color: var(--gold); }
   .features-hd .eyebrow::before { background: var(--gold); }
   .features-hd .sec-title { color: var(--cream); }
- 
+
   .features-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: rgba(255,255,255,0.08); }
- 
+
   .feature-card {
     background: var(--ink); padding: 32px 28px;
     border: 1px solid rgba(255,255,255,0.06);
@@ -261,15 +261,15 @@
     position: relative;
   }
   .feature-card:hover { background: var(--ink2); }
- 
+
   .feature-icon { font-size: 26px; margin-bottom: 16px; display: block; }
   .feature-card h4 { font-family: var(--sans); font-size: 15px; font-weight: 700; margin-bottom: 10px; color: var(--cream); letter-spacing: 0.2px; }
   .feature-card p { font-size: 13px; color: rgba(240,235,225,0.5); line-height: 1.65; font-weight: 300; }
- 
+
   /* ── APP SECTION ── */
   .app-section { padding: 100px 0; background: var(--cream2); border-top: 1px solid var(--border); }
   .app-hd { margin-bottom: 48px; }
- 
+
   .app-card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -277,24 +277,24 @@
     overflow: hidden;
     box-shadow: 0 4px 40px rgba(26,22,18,0.08);
   }
- 
+
   .app-step { padding: 36px 40px; border-bottom: 1px solid var(--border2); }
   .app-step:last-child { border-bottom: none; }
- 
+
   .step-label-inner {
     font-family: var(--sans); font-size: 10px; font-weight: 700;
     letter-spacing: 2.5px; text-transform: uppercase; color: var(--red);
     margin-bottom: 24px; display: flex; align-items: center; gap: 12px;
   }
   .step-label-inner::after { content: ''; flex: 1; height: 1px; background: var(--border); }
- 
+
   label {
     display: block; font-family: var(--sans); font-size: 12px; font-weight: 700;
     letter-spacing: 0.5px; text-transform: uppercase; color: var(--ink2);
     margin-bottom: 8px;
   }
   label small { font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--ink3); margin-left: 6px; }
- 
+
   .upload-zone {
     border: 2px dashed var(--border2); border-radius: 8px;
     padding: 32px 24px; text-align: center; cursor: pointer;
@@ -307,7 +307,7 @@
   .upload-hint { font-family: var(--sans); font-size: 11px; color: var(--ink3); display: block; }
   .upload-filename { font-family: var(--sans); font-size: 14px; color: var(--ink); font-weight: 700; display: block; margin-bottom: 4px; }
   .upload-change { font-family: var(--sans); font-size: 11px; color: var(--red); text-decoration: underline; cursor: pointer; display: block; }
- 
+
   textarea, input[type="text"] {
     width: 100%; background: var(--cream); border: 1px solid var(--border2);
     border-radius: 3px; padding: 12px 16px; color: var(--ink);
@@ -318,13 +318,13 @@
   textarea { min-height: 180px; }
   textarea:focus, input:focus { border-color: var(--red); background: white; }
   textarea::placeholder, input::placeholder { color: var(--ink3); }
- 
+
   .field { margin-bottom: 20px; }
   .char-hint { font-family: var(--sans); font-size: 11px; color: var(--ink3); margin-top: 5px; }
- 
+
   /* Country selector */
   .country-selector { position: relative; }
- 
+
   .country-trigger {
     width: 100%; background: var(--cream); border: 1px solid var(--border2);
     border-radius: 3px; padding: 11px 16px; color: var(--ink);
@@ -338,7 +338,7 @@
   .country-trigger-text.has-selection { color: var(--ink); }
   .country-chevron { font-size: 9px; color: var(--ink3); transition: transform 0.2s; flex-shrink: 0; margin-left: 8px; }
   .country-trigger.open .country-chevron { transform: rotate(180deg); }
- 
+
   .country-dropdown {
     display: none; position: absolute; top: calc(100% + 6px); left: 0; right: 0;
     background: white; border: 1px solid var(--border2);
@@ -346,7 +346,7 @@
     box-shadow: 0 8px 32px rgba(26,22,18,0.14);
   }
   .country-dropdown.open { display: block; }
- 
+
   .country-search {
     padding: 10px 12px; border-bottom: 1px solid var(--border);
     position: sticky; top: 0; background: white; z-index: 1;
@@ -358,13 +358,13 @@
     transition: border-color 0.15s; text-transform: none; letter-spacing: 0;
   }
   .country-search input:focus { border-color: var(--red); }
- 
+
   .country-group-label {
     font-family: var(--sans); font-size: 9px; font-weight: 700;
     letter-spacing: 2px; text-transform: uppercase; color: var(--ink3);
     padding: 10px 14px 4px;
   }
- 
+
   .country-option {
     display: flex; align-items: center; gap: 10px;
     padding: 9px 14px; cursor: pointer;
@@ -377,7 +377,7 @@
   .country-option .co-flag { font-size: 16px; flex-shrink: 0; }
   .country-option .co-check { margin-left: auto; font-size: 11px; color: var(--red); display: none; font-weight: 700; }
   .country-option.selected .co-check { display: block; }
- 
+
   .country-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
   .country-tag {
     display: inline-flex; align-items: center; gap: 6px;
@@ -387,11 +387,11 @@
   }
   .country-tag-remove { cursor: pointer; color: var(--red); font-size: 14px; line-height: 1; opacity: 0.6; transition: opacity 0.15s; }
   .country-tag-remove:hover { opacity: 1; }
- 
+
   .optional-hint { font-family: var(--sans); font-size: 11px; color: var(--ink3); margin-top: 6px; font-style: italic; }
- 
+
   .app-actions { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 4px; }
- 
+
   .btn-find {
     display: inline-flex; align-items: center; gap: 10px;
     background: var(--ink); color: var(--cream);
@@ -402,24 +402,24 @@
   }
   .btn-find:hover { background: var(--red); }
   .btn-find:disabled { opacity: 0.4; cursor: not-allowed; }
- 
+
   .loading { display: none; align-items: center; gap: 12px; font-family: var(--sans); font-size: 12px; color: var(--ink3); letter-spacing: 0.5px; }
   .loading.active { display: flex; }
   .spinner { width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--red); border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
   @keyframes spin { to { transform: rotate(360deg); } }
- 
+
   .error-box { display: none; background: var(--red-light); border: 1px solid rgba(214,63,42,0.25); border-radius: 3px; padding: 12px 16px; font-family: var(--sans); font-size: 12px; color: var(--red); margin-top: 12px; letter-spacing: 0.2px; }
   .error-box.active { display: block; }
- 
+
   /* Results */
   #results-section { display: none; }
   #results-section.active { display: block; }
- 
+
   .results-meta { font-family: var(--sans); font-size: 11px; color: var(--ink3); letter-spacing: 0.5px; margin-bottom: 16px; text-transform: uppercase; }
   .results-meta strong { color: var(--ink); font-weight: 700; }
- 
+
   .job-list { display: flex; flex-direction: column; gap: 0; }
- 
+
   .job-card {
     display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: start;
     background: white; border-bottom: 1px solid var(--border);
@@ -430,14 +430,14 @@
   .job-card:first-child { border-top: 1px solid var(--border); }
   .job-card:hover { background: var(--cream); }
   @keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
- 
+
   .job-title { font-family: var(--sans); font-size: 17px; font-weight: 700; margin-bottom: 4px; color: var(--ink); letter-spacing: -0.2px; }
   .job-meta { display: flex; gap: 14px; flex-wrap: wrap; font-family: var(--sans); font-size: 11px; color: var(--ink3); margin-bottom: 10px; letter-spacing: 0.3px; text-transform: uppercase; }
   .job-reason { font-size: 13px; color: var(--ink3); font-style: italic; line-height: 1.6; margin-bottom: 14px; font-family: var(--body); font-weight: 300; }
   .job-date { font-size: 11px; color: var(--ink3); font-family: var(--sans); }
   .job-date-stale { color: #b45309; }
   .job-btns { display: flex; gap: 8px; flex-wrap: wrap; }
- 
+
   .btn-ghost {
     background: transparent; border: 1px solid var(--border2); color: var(--ink2);
     font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
@@ -448,15 +448,15 @@
   .btn-ghost:hover { border-color: var(--ink); color: var(--ink); }
   .btn-ghost-accent { background: var(--red); border-color: var(--red); color: white; }
   .btn-ghost-accent:hover { background: var(--red2); border-color: var(--red2); color: white; }
- 
+
   .match-block { text-align: right; flex-shrink: 0; padding-top: 4px; }
   .match-pct { font-family: var(--serif); font-size: 32px; font-weight: 900; color: var(--ink); line-height: 1; letter-spacing: -1px; }
   .match-lbl { font-family: var(--sans); font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--ink3); margin-top: 2px; }
   .match-bar { width: 56px; height: 2px; background: var(--border); margin-top: 8px; overflow: hidden; margin-left: auto; }
   .match-fill { height: 100%; background: var(--red); }
- 
+
   /* ── CTA ── */
- 
+
   .btn-main-white {
     display: inline-flex; align-items: center; gap: 10px;
     background: white; color: var(--red);
@@ -467,7 +467,7 @@
   }
   .btn-main-white:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
   .hero-sub-white { font-family: var(--body); font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 14px; }
- 
+
   /* ── MODAL ── */
   .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(26,22,18,0.75); z-index: 200; padding: 24px; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
   .modal-overlay.active { display: flex; }
@@ -485,13 +485,13 @@
   .btn-copy { background: var(--ink); border: none; color: var(--cream); font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 10px 22px; border-radius: 3px; cursor: pointer; transition: all 0.15s; }
   .btn-copy:hover { background: var(--red); }
   .copy-ok { font-family: var(--sans); font-size: 11px; color: #2a9d2a; display: none; font-weight: 700; letter-spacing: 0.5px; }
- 
+
   /* ── FOOTER ── */
   footer { background: var(--ink); padding: 28px 40px; display: flex; justify-content: space-between; align-items: center; font-family: var(--sans); font-size: 12px; color: rgba(240,235,225,0.4); letter-spacing: 0.3px; }
   footer a { color: rgba(240,235,225,0.4); text-decoration: underline; transition: color 0.15s; }
   footer a:hover { color: var(--cream); }
   footer strong { color: rgba(240,235,225,0.7); }
- 
+
   /* ── RESPONSIVE ── */
   @media(max-width:900px){
     .hero-inner { grid-template-columns: 1fr; }
@@ -517,7 +517,7 @@
 </style>
 </head>
 <body>
- 
+
 <!-- NAV -->
 <nav>
   <a href="#" class="nav-logo">Hire<span>EU</span></a>
@@ -526,7 +526,7 @@
     <a href="#how-it-works" class="nav-link">How it works</a>
   </div>
 </nav>
- 
+
 <!-- HERO -->
 <section class="hero">
   <div class="container">
@@ -554,7 +554,7 @@
     </div>
   </div>
 </section>
- 
+
 <!-- FLAGS -->
 <div class="flags-strip">
   <div class="container">
@@ -572,7 +572,7 @@
     </div>
   </div>
 </div>
- 
+
 <!-- HOW IT WORKS -->
 <section id="how-it-works">
   <div class="container">
@@ -603,7 +603,7 @@
     </div>
   </div>
 </section>
- 
+
 <!-- PAIN POINTS -->
 <section class="pain-section">
   <div class="container">
@@ -623,7 +623,7 @@
     </div>
   </div>
 </section>
- 
+
 <!-- FEATURES -->
 <section class="features-section">
   <div class="container">
@@ -641,7 +641,7 @@
     </div>
   </div>
 </section>
- 
+
 <!-- APP TOOL -->
 <section class="app-section" id="app">
   <div class="container">
@@ -650,7 +650,7 @@
       <div class="sec-title">Find jobs that fit your CV</div>
       <p class="sec-sub">Paste your CV, enter a role — get AI-scored matches and one-click cover letters.</p>
     </div>
- 
+
     <div class="app-card">
       <div class="app-step">
         <div class="step-label-inner">Step 01 — Your CV &amp; Target Role</div>
@@ -700,7 +700,7 @@
         </div>
         <div class="error-box" id="main-error"></div>
       </div>
- 
+
       <div id="results-section">
         <div class="app-step" style="padding-bottom:8px">
           <div class="step-label-inner">Step 02 — Your Matches</div>
@@ -711,14 +711,14 @@
     </div>
   </div>
 </section>
- 
+
 <!-- CTA -->
 <!-- FOOTER -->
 <footer>
   <div>© 2026 <strong>HireEU</strong> — Helping foreigners find their place in Poland &amp; the EU.</div>
   <div><a href="/privacy.html">Privacy Policy</a></div>
 </footer>
- 
+
 <!-- MODAL -->
 <div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
   <div class="modal">
@@ -735,12 +735,12 @@
     </div>
   </div>
 </div>
- 
+
 <script>
   let candidateSummary = '';
   let currentCL = '';
   let jobsStore = [];
- 
+
   // ── Country selector ──
   const EU_COUNTRIES = [
     { code: 'PL', name: 'Poland',         flag: '🇵🇱', priority: true },
@@ -752,10 +752,10 @@
     { code: 'NL', name: 'Netherlands',    flag: '🇳🇱', priority: false },
     { code: 'GB', name: 'United Kingdom', flag: '🇬🇧', priority: false },
   ];
- 
+
   const MAX_COUNTRIES = 3;
   let selectedCountries = [];
- 
+
   function buildCountryList(filter = '') {
     const list = document.getElementById('country-list');
     const q = filter.toLowerCase();
@@ -763,7 +763,7 @@
     const priority = filtered.filter(c => c.priority);
     const rest = filtered.filter(c => !c.priority);
     list.innerHTML = '';
- 
+
     function renderGroup(label, items) {
       if (!items.length) return;
       if (label) {
@@ -782,11 +782,11 @@
         list.appendChild(el);
       });
     }
- 
+
     renderGroup(filter ? '' : 'Popular', priority);
     renderGroup(filter ? '' : 'All EU + EEA', rest);
   }
- 
+
   function toggleCountry(country) {
     const idx = selectedCountries.findIndex(c => c.code === country.code);
     if (idx > -1) { selectedCountries.splice(idx, 1); }
@@ -794,13 +794,13 @@
     updateCountryUI();
     buildCountryList(document.getElementById('country-search-input').value);
   }
- 
+
   function removeCountry(code) {
     selectedCountries = selectedCountries.filter(c => c.code !== code);
     updateCountryUI();
     buildCountryList(document.getElementById('country-search-input').value);
   }
- 
+
   function updateCountryUI() {
     const trigger = document.getElementById('trigger-text');
     if (selectedCountries.length === 0) {
@@ -819,60 +819,60 @@
       tags.appendChild(tag);
     });
   }
- 
+
   function toggleDropdown() {
     const trigger = document.getElementById('country-trigger');
     const dropdown = document.getElementById('country-dropdown');
     if (dropdown.classList.contains('open')) { closeDropdown(); }
     else { trigger.classList.add('open'); dropdown.classList.add('open'); setTimeout(() => document.getElementById('country-search-input').focus(), 50); }
   }
- 
+
   function closeDropdown() {
     document.getElementById('country-trigger').classList.remove('open');
     document.getElementById('country-dropdown').classList.remove('open');
     document.getElementById('country-search-input').value = '';
     buildCountryList();
   }
- 
+
   function filterCountries(val) { buildCountryList(val); }
- 
+
   document.addEventListener('click', (e) => {
     if (!document.getElementById('country-selector').contains(e.target)) closeDropdown();
   });
- 
+
   buildCountryList();
- 
+
   // ── Loading messages ──
   const msgs = ['Analysing CV...', 'Extracting keywords...', 'Searching job listings...', 'Scoring matches...'];
   let msgInt;
   function startMsgs(){ let i=0; document.getElementById('loading-msg').textContent=msgs[0]; msgInt=setInterval(()=>{i=(i+1)%msgs.length;document.getElementById('loading-msg').textContent=msgs[i];},2200); }
   function stopMsgs(){ clearInterval(msgInt); }
- 
+
   // ── Main flow ──
   // ── File upload handling ──
   let selectedFile = null;
- 
+
   function onFileSelect(e) {
     const file = e.target.files[0];
     if (file) setFile(file);
   }
- 
+
   function onDragOver(e) {
     e.preventDefault();
     document.getElementById('upload-zone').classList.add('drag-over');
   }
- 
+
   function onDragLeave(e) {
     document.getElementById('upload-zone').classList.remove('drag-over');
   }
- 
+
   function onDrop(e) {
     e.preventDefault();
     document.getElementById('upload-zone').classList.remove('drag-over');
     const file = e.dataTransfer.files[0];
     if (file) setFile(file);
   }
- 
+
   function setFile(file) {
     const allowed = ['application/pdf',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -888,7 +888,7 @@
     document.getElementById('upload-selected').style.display = 'block';
     document.getElementById('upload-filename').textContent = file.name;
   }
- 
+
   function fileToBase64(file) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -897,7 +897,7 @@
       reader.readAsDataURL(file);
     });
   }
- 
+
   // ── Main flow ──
   async function findJobs(){
     const role=document.getElementById('role-input').value.trim();
@@ -908,20 +908,20 @@
     try{
       const fileBase64 = await fileToBase64(selectedFile);
       const fileType = selectedFile.type || 'application/octet-stream';
- 
+
       const p=await fetch('/api/parse-cv',{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({fileBase64, fileType, role})});
       if(!p.ok) throw new Error(await p.text());
       const parsed=await p.json();
       candidateSummary=parsed.summary;
- 
+
       const countryNames = selectedCountries.map(c => c.name);
       const s=await fetch('/api/search-jobs',{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({query:parsed.searchQuery,countries:countryNames})});
       if(!s.ok) throw new Error(await s.text());
       const {jobs}=await s.json();
       if(!jobs?.length) throw new Error('No jobs found. Try a broader role title.');
- 
+
       const m=await fetch('/api/match-and-score',{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({summary:candidateSummary, skills:parsed.skills, yearsExperience:parsed.yearsExperience, jobs})});
       if(!m.ok) throw new Error(await m.text());
@@ -930,17 +930,17 @@
     }catch(e){showErr(e.message||'Something went wrong. Please try again.');}
     finally{setLoading(false);}
   }
- 
+
   function renderResults(scored, role){
     const MIN_MATCH = 60;
     const qualified = scored
       .filter(j => j.match >= MIN_MATCH)
       .sort((a,b) => b.match - a.match);
- 
+
     jobsStore = qualified;
     const list = document.getElementById('job-list');
     list.innerHTML = '';
- 
+
     if (qualified.length === 0) {
       document.getElementById('results-meta').innerHTML =
         `No jobs above <strong>${MIN_MATCH}% match</strong> found for "${role}". Try a different role title or select different countries.`;
@@ -948,15 +948,15 @@
       document.getElementById('results-section').scrollIntoView({behavior:'smooth',block:'start'});
       return;
     }
- 
+
     document.getElementById('results-meta').innerHTML =
       `<strong>${qualified.length} job${qualified.length!==1?'s':''}</strong> above ${MIN_MATCH}% match for "${role}"`;
- 
+
     qualified.forEach((job, i) => {
       const c = document.createElement('div');
       c.className = 'job-card';
       c.style.animationDelay = `${i*55}ms`;
- 
+
       // Posted date + staleness
       let dateHtml = '';
       if (job.postedAt) {
@@ -964,7 +964,7 @@
         const stale = days > 14;
         dateHtml = `<span class="job-date ${stale ? 'job-date-stale' : ''}">${stale ? '⚠️ ' : ''}${days === 0 ? 'Today' : days === 1 ? '1 day ago' : `${days} days ago`}</span>`;
       }
- 
+
       c.innerHTML = `
         <div>
           <div class="job-title">${esc(job.title)}</div>
@@ -987,11 +987,11 @@
         </div>`;
       list.appendChild(c);
     });
- 
+
     document.getElementById('results-section').classList.add('active');
     document.getElementById('results-section').scrollIntoView({behavior:'smooth',block:'start'});
   }
- 
+
   async function openCL(index){
     const job=jobsStore[index];
     if(!job) return;
@@ -1005,7 +1005,7 @@
       document.getElementById('modal-ft').style.display='flex';
     }catch(e){document.getElementById('modal-body').innerHTML=`<div style="color:var(--red);font-family:var(--sans);font-size:12px">Error: ${esc(e.message)}</div>`;}
   }
- 
+
   function openModal(){
     document.getElementById('modal-body').innerHTML=`<div class="modal-loading"><div class="spinner"></div><span>Writing your cover letter...</span></div>`;
     document.getElementById('modal-overlay').classList.add('active');
@@ -1013,7 +1013,7 @@
   }
   function closeModal(e){ if(e.target===document.getElementById('modal-overlay')) closeModalDirect(); }
   function closeModalDirect(){ document.getElementById('modal-overlay').classList.remove('active'); document.body.style.overflow=''; }
- 
+
   function copyCL(){
     if(!currentCL) return;
     navigator.clipboard.writeText(currentCL).then(()=>{
@@ -1021,7 +1021,7 @@
       setTimeout(()=>el.style.display='none',2000);
     });
   }
- 
+
   function setLoading(on){
     document.getElementById('find-btn').disabled=on;
     const el=document.getElementById('main-loading');
