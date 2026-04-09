@@ -188,6 +188,9 @@ Respond ONLY with JSON, no markdown:
       }
     });
 
+    // Log scores for debugging
+    console.log('Scores:', scored.map(s => `${s.title?.slice(0,30)}: ${s.match}%`).join(' | '));
+
     return res.status(200).json({ scored });
 
   } catch (err) {
