@@ -922,15 +922,27 @@
       const {jobs}=await s.json();
       if(!jobs?.length) throw new Error('No jobs found. Try a broader role title.');
 
-      const m=await fetch('/api/match-and-score',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({summary:candidateSummary, skills:parsed.skills, yearsExperience:parsed.yearsExperience, jobs})});
-      if(!m.ok) throw new Error(await m.text());
-      const {scored}=await m.json();
-      renderResults(scored,role);
-    }catch(e){showErr(e.message||'Something went wrong. Please try again.');}
-    finally{setLoading(false);}
-  }
+      const m = await fetch('/api/match-and-score', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    cvText: candidateSummary,   // or fullCvText if you have it
+    targetRole: role,
+    jobs
+  })
+});
 
+if (!m.ok) throw new Error(await m.text());
+
+const results = await m.json();
+
+renderResults(results, role);
+
+} catch (e) {
+  showErr(e.message || 'Something went wrong. Please try again.');
+} finally {
+  setLoading(false);
+}
   function renderResults(scored, role){
     jobsStore = scored.sort((a,b) => b.match - a.match);
     const list = document.getElementById('job-list');
