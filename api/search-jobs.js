@@ -1,11 +1,11 @@
 // /api/search-jobs.js
-// Adzuna API — only uses confirmed supported country codes
+// Sources:
+//   1. Jooble — Poland priority, aggregates Pracuj.pl, OLX, local boards (free, needs JOOBLE_API_KEY)
+//   2. Adzuna — EU coverage for non-Poland countries (free, needs ADZUNA_APP_ID + ADZUNA_APP_KEY)
+// Results are merged, deduplicated, and sorted freshest first.
+// Poland results appear first regardless of date.
 
-// Adzuna supported EU/EEA countries (confirmed working)
-const ADZUNA_SUPPORTED = new Set(['pl', 'de', 'fr', 'it', 'es', 'at', 'gb', 'nl', 'ru', 'in', 'au', 'ca', 'us', 'nz', 'za', 'br', 'sg']);
-
-const COUNTRY_MAP = {
-  'poland':          'pl',
+const ADZUNA_COUNTRY_MAP = {
   'germany':         'de',
   'france':          'fr',
   'italy':           'it',
@@ -15,15 +15,43 @@ const COUNTRY_MAP = {
   'netherlands':     'nl',
 };
 
-// Default: Poland + Germany + France (all confirmed supported)
-const DEFAULT_COUNTRIES = ['pl', 'de', 'fr'];
+// ── Jooble ──
+async function searchJooble(query, location, apiKey) {
+  const response = await fetch(`https://jooble.org/api/${apiKey}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      keywords: query,
+      location: location || 'Poland',
+      page: 1,
+      resultsOnPage: 15,
+    })
+  });
 
-async function searchAdzuna(countryCode, query, appId, appKey) {
-  // Skip unsupported countries silently
-  if (!ADZUNA_SUPPORTED.has(countryCode)) {
-    console.log(`Skipping unsupported country: ${countryCode}`);
+  if (!response.ok) {
+    console.error('Jooble error:', response.status, await response.text().catch(() => ''));
     return [];
   }
+
+  const data = await response.json();
+  return (data.jobs || []).map(j => ({
+    id: `jooble_${j.id || Math.random()}`,
+    title: j.title || '',
+    company: j.company || '',
+    location: j.location || location || 'Poland',
+    country: 'pl',
+    type: j.type || '',
+    description: (j.snippet || '').slice(0, 600),
+    applyUrl: j.link || '',
+    postedAt: j.updated ? new Date(j.updated).toISOString() : null,
+    source: 'jooble',
+  }));
+}
+
+// ── Adzuna ──
+async function searchAdzuna(countryCode, query, appId, appKey) {
+  const SUPPORTED = new Set(['de','fr','it','es','at','gb','nl','pl']);
+  if (!SUPPORTED.has(countryCode)) return [];
 
   const url = new URL(`https://api.adzuna.com/v1/api/jobs/${countryCode}/search/1`);
   url.searchParams.set('app_id', appId);
@@ -32,34 +60,29 @@ async function searchAdzuna(countryCode, query, appId, appKey) {
   url.searchParams.set('results_per_page', '10');
   url.searchParams.set('max_days_old', '30');
   url.searchParams.set('sort_by', 'date');
-  url.searchParams.set('content-type', 'application/json');
 
   const response = await fetch(url.toString(), {
     headers: { 'Accept': 'application/json' }
   });
 
   if (!response.ok) {
-    const err = await response.text();
-    console.error(`Adzuna error (${countryCode}):`, err.slice(0, 200));
+    console.error(`Adzuna error (${countryCode}):`, response.status);
     return [];
   }
 
   const data = await response.json();
-  return (data.results || []).map(j => ({ ...j, _country: countryCode }));
-}
-
-function normaliseJob(j) {
-  return {
-    id: j.id,
+  return (data.results || []).map(j => ({
+    id: `adzuna_${j.id}`,
     title: j.title || '',
     company: j.company?.display_name || '',
     location: j.location?.display_name || '',
-    country: j._country || '',
+    country: countryCode,
     type: j.contract_time || j.contract_type || '',
     description: (j.description || '').slice(0, 600),
     applyUrl: j.redirect_url || '',
     postedAt: j.created || null,
-  };
+    source: 'adzuna',
+  }));
 }
 
 export default async function handler(req, res) {
@@ -68,39 +91,65 @@ export default async function handler(req, res) {
   const { query, countries } = req.body;
   if (!query) return res.status(400).json({ error: 'Missing query' });
 
-  const appId  = process.env.ADZUNA_APP_ID;
-  const appKey = process.env.ADZUNA_APP_KEY;
-  if (!appId || !appKey) return res.status(500).json({ error: 'Adzuna API keys not configured.' });
+  const joobleKey  = process.env.JOOBLE_API_KEY;
+  const adzunaId   = process.env.ADZUNA_APP_ID;
+  const adzunaKey  = process.env.ADZUNA_APP_KEY;
 
-  // Resolve selected countries, fallback to defaults
-  let codes;
-  if (Array.isArray(countries) && countries.length > 0) {
-    codes = countries.map(c => COUNTRY_MAP[c.toLowerCase()]).filter(Boolean);
-    if (codes.length === 0) codes = DEFAULT_COUNTRIES;
-  } else {
-    codes = DEFAULT_COUNTRIES;
+  const hasCountries = Array.isArray(countries) && countries.length > 0;
+  const selectedLower = hasCountries ? countries.map(c => c.toLowerCase()) : [];
+  const includesPoland = !hasCountries || selectedLower.includes('poland');
+
+  // Build parallel tasks
+  const tasks = [];
+
+  // Always search Poland via Jooble if Poland is selected or no country selected
+  if (includesPoland && joobleKey) {
+    tasks.push(searchJooble(query, 'Poland', joobleKey));
+  } else if (includesPoland && adzunaId) {
+    // Fallback to Adzuna Poland if no Jooble key
+    tasks.push(searchAdzuna('pl', query, adzunaId, adzunaKey));
+  }
+
+  // Add Adzuna for other selected countries
+  if (hasCountries && adzunaId) {
+    for (const country of selectedLower) {
+      if (country === 'poland') continue; // already handled above
+      const code = ADZUNA_COUNTRY_MAP[country];
+      if (code) tasks.push(searchAdzuna(code, query, adzunaId, adzunaKey));
+    }
+  } else if (!hasCountries && adzunaId) {
+    // No country selected — also search DE and FR as EU fallback
+    tasks.push(searchAdzuna('de', query, adzunaId, adzunaKey));
+    tasks.push(searchAdzuna('fr', query, adzunaId, adzunaKey));
+  }
+
+  if (tasks.length === 0) {
+    return res.status(500).json({ error: 'No job search services configured. Check API keys.' });
   }
 
   try {
-    const results = await Promise.allSettled(
-      codes.map(code => searchAdzuna(code, query, appId, appKey))
-    );
-
-    const allRaw = results.flatMap(r => r.status === 'fulfilled' ? r.value : []);
+    const results = await Promise.allSettled(tasks);
+    const allJobs = results.flatMap(r => r.status === 'fulfilled' ? r.value : []);
 
     // Deduplicate by id
     const seen = new Set();
-    const unique = allRaw.filter(j => {
+    const unique = allJobs.filter(j => {
       if (!j.id || seen.has(j.id)) return false;
       seen.add(j.id);
       return true;
     });
 
-    // Sort freshest first
-    unique.sort((a, b) => new Date(b.created || 0) - new Date(a.created || 0));
+    // Sort: Poland (Jooble) first, then by date
+    unique.sort((a, b) => {
+      const aPoland = a.country === 'pl' ? 0 : 1;
+      const bPoland = b.country === 'pl' ? 0 : 1;
+      if (aPoland !== bPoland) return aPoland - bPoland;
+      return new Date(b.postedAt || 0) - new Date(a.postedAt || 0);
+    });
 
-    const jobs = unique.slice(0, 10).map(normaliseJob);
-    console.log(`search-jobs: found ${jobs.length} jobs for "${query}" in [${codes.join(', ')}]`);
+    const jobs = unique.slice(0, 15);
+    console.log(`search-jobs: ${jobs.length} jobs — ${jobs.filter(j=>j.country==='pl').length} Poland, ${jobs.filter(j=>j.country!=='pl').length} other`);
+
     return res.status(200).json({ jobs });
 
   } catch (err) {
