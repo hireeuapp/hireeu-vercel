@@ -5,102 +5,151 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Privacy Policy — HireEU</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,700;0,9..144,900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Syne:wght@400;500;600;700;800&family=Mulish:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --navy: #0d1f3c; --blue: #1a4dcc; --sky: #3b82f6;
-      --off: #f7f9fc; --border: #dde4ef; --muted: #64748b; --text: #1e293b;
+      --serif: 'Playfair Display', Georgia, serif;
+      --sans: 'Syne', sans-serif;
+      --body: 'Mulish', sans-serif;
+      --cream: #f0ebe1;
+      --cream2: #e8e2d6;
+      --ink: #1a1612;
+      --ink2: #3d3730;
+      --ink3: #7a6f64;
+      --surface: #ffffff;
+      --border: #d4cdc4;
+      --border2: #c4bdb3;
+      --red: #d63f2a;
+      --red2: #e85c47;
+      --red-light: #fdf1ef;
+      --gold: #c49a3c;
+      --green: #1e7d46;
+      --green-light: #edf7f1;
     }
-    body { font-family: 'DM Sans', sans-serif; color: var(--text); background: var(--off); line-height: 1.7; }
-
+    body {
+      font-family: var(--body);
+      background: var(--cream);
+      color: var(--ink);
+      font-size: 16px;
+      line-height: 1.7;
+    }
     nav {
-      background: white; border-bottom: 1px solid var(--border);
-      padding: 1.1rem 2rem; display: flex; align-items: center; justify-content: space-between;
+      background: var(--ink);
+      padding: 18px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
-    .logo { font-family: 'Fraunces', serif; font-size: 1.4rem; font-weight: 900; color: var(--navy); text-decoration: none; letter-spacing: -0.03em; }
-    .logo span { color: var(--blue); }
-    nav a.back { font-size: 0.875rem; color: var(--muted); text-decoration: none; font-weight: 500; }
-    nav a.back:hover { color: var(--navy); }
-
+    .nav-logo {
+      font-family: var(--sans); font-size: 20px; font-weight: 800;
+      color: var(--cream); text-decoration: none; letter-spacing: -0.5px;
+    }
+    .nav-logo span { color: var(--red2); }
+    .nav-back {
+      font-family: var(--sans); font-size: 12px; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+      color: rgba(240,235,225,0.5); text-decoration: none;
+      transition: color 0.15s;
+    }
+    .nav-back:hover { color: var(--cream); }
     .page { max-width: 680px; margin: 0 auto; padding: 56px 24px 80px; }
-
     .page-header { margin-bottom: 40px; }
     .page-label {
-      display: inline-block; font-size: 0.72rem; text-transform: uppercase;
-      letter-spacing: 0.12em; color: var(--blue); font-weight: 700; margin-bottom: 10px;
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: var(--sans); font-size: 10px; font-weight: 700;
+      letter-spacing: 2.5px; text-transform: uppercase; color: var(--red);
+      margin-bottom: 16px;
     }
+    .page-label::before { content: ''; width: 28px; height: 1px; background: var(--gold); }
     h1 {
-      font-family: 'Fraunces', serif; font-size: 2.2rem; font-weight: 900;
-      color: var(--navy); letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 12px;
+      font-family: var(--serif); font-size: clamp(28px, 4vw, 44px);
+      font-weight: 900; line-height: 1.08; letter-spacing: -1px;
+      color: var(--ink); margin-bottom: 14px;
     }
-    .last-updated { font-size: 0.85rem; color: var(--muted); }
-
+    h1 em { font-style: italic; color: var(--red2); }
+    .last-updated {
+      font-family: var(--sans); font-size: 11px; font-weight: 600;
+      letter-spacing: 0.5px; text-transform: uppercase; color: var(--ink3);
+    }
     .intro-box {
-      background: white; border: 1px solid var(--border); border-left: 3px solid var(--blue);
-      border-radius: 12px; padding: 20px 24px; margin-bottom: 40px;
-      font-size: 0.95rem; color: var(--text); line-height: 1.7;
+      background: var(--surface); border: 1px solid var(--border2);
+      border-left: 3px solid var(--red); border-radius: 3px;
+      padding: 20px 24px; margin-bottom: 40px;
+      font-size: 0.95rem; color: var(--ink2); line-height: 1.7;
+      font-family: var(--body); font-weight: 300;
     }
-
     .section { margin-bottom: 36px; }
     h2 {
-      font-family: 'Fraunces', serif; font-size: 1.2rem; font-weight: 700;
-      color: var(--navy); margin-bottom: 10px; letter-spacing: -0.01em;
+      font-family: var(--sans); font-size: 11px; font-weight: 800;
+      letter-spacing: 1.5px; text-transform: uppercase; color: var(--ink2);
+      margin-bottom: 14px;
       display: flex; align-items: center; gap: 10px;
     }
-    h2 .icon { font-size: 1.1rem; }
-    p { font-size: 0.95rem; color: var(--muted); margin-bottom: 10px; }
+    h2 .icon { font-size: 14px; }
+    h2::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    p {
+      font-size: 0.95rem; color: var(--ink3); margin-bottom: 10px;
+      font-family: var(--body); font-weight: 300;
+    }
     p:last-child { margin-bottom: 0; }
-    p strong { color: var(--text); font-weight: 600; }
-
+    p strong { color: var(--ink2); font-weight: 600; }
+    p a { color: var(--red); font-weight: 600; text-decoration: none; }
+    p a:hover { color: var(--ink); }
     .highlight {
-      background: white; border: 1px solid var(--border); border-radius: 12px;
-      padding: 20px 24px; margin-top: 12px;
+      background: var(--surface); border: 1px solid var(--border2);
+      border-radius: 3px; padding: 20px 24px; margin-top: 12px;
     }
     .highlight p { margin-bottom: 8px; }
     .highlight p:last-child { margin-bottom: 0; }
-
     .data-row {
       display: flex; gap: 12px; align-items: flex-start;
       padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 0.92rem;
     }
-    .data-row:last-child { border-bottom: none; }
-    .data-label { font-weight: 600; color: var(--navy); min-width: 130px; flex-shrink: 0; }
-    .data-value { color: var(--muted); }
-
+    .data-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .data-label {
+      font-family: var(--sans); font-weight: 700; font-size: 11px;
+      letter-spacing: 0.5px; text-transform: uppercase;
+      color: var(--ink2); min-width: 130px; flex-shrink: 0;
+    }
+    .data-value { color: var(--ink3); font-family: var(--body); font-weight: 300; font-size: 0.92rem; }
     .delete-box {
-      background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px;
-      padding: 20px 24px; margin-top: 12px;
+      background: var(--green-light); border: 1px solid rgba(30,125,70,0.2);
+      border-radius: 3px; padding: 20px 24px; margin-top: 12px;
     }
-    .delete-box p { color: #15803d; }
-    .delete-box a { color: #15803d; font-weight: 600; }
-
+    .delete-box p { color: var(--green); }
+    .delete-box a { color: var(--green); font-weight: 700; }
     .server-box {
-      background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px;
-      padding: 20px 24px; margin-top: 12px;
+      background: rgba(196,154,60,0.08); border: 1px solid rgba(196,154,60,0.3);
+      border-radius: 3px; padding: 20px 24px; margin-top: 12px;
     }
-    .server-box p { color: #1e40af; }
-
+    .server-box p { color: var(--ink2); }
+    .server-box a { color: var(--red); font-weight: 700; }
     footer {
-      margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--border);
-      text-align: center; font-size: 0.82rem; color: var(--muted);
+      margin-top: 60px;
+      background: var(--ink); border-radius: 3px;
+      padding: 24px 32px;
+      text-align: center;
+      font-family: var(--sans); font-size: 12px;
+      color: rgba(240,235,225,0.35); letter-spacing: 0.3px;
     }
-    footer a { color: var(--blue); text-decoration: none; font-weight: 500; }
+    footer a { color: rgba(240,235,225,0.35); text-decoration: underline; transition: color 0.15s; }
+    footer a:hover { color: var(--cream); }
+    footer strong { color: rgba(240,235,225,0.6); }
   </style>
 </head>
 <body>
 
 <nav>
-  <a href="/" class="logo">Hire<span>EU</span></a>
-  <a href="/" class="back">← Back to home</a>
+  <a href="/" class="nav-logo">Hire<span>EU</span></a>
+  <a href="/" class="nav-back">← Back to home</a>
 </nav>
 
 <div class="page">
 
   <div class="page-header">
-    <span class="page-label">Legal</span>
-    <h1>Privacy Policy</h1>
+    <div class="page-label">Legal</div>
+    <h1>Privacy <em>Policy</em></h1>
     <p class="last-updated">Last updated: April 2026</p>
   </div>
 
@@ -108,7 +157,6 @@
     This policy is written in plain English, not legal jargon. HireEU is a small early-stage project — there's no team of lawyers here, just one person building something useful. Here's exactly what happens with your data, honestly.
   </div>
 
-  <!-- What we collect -->
   <div class="section">
     <h2><span class="icon">📋</span> What data we collect</h2>
     <p>We collect <strong>one thing only</strong> when you join the waitlist:</p>
@@ -125,7 +173,6 @@
     <p style="margin-top: 12px;">That's it. No name, no location, no tracking cookies, no analytics scripts. We don't use Google Analytics or any third-party trackers on this page.</p>
   </div>
 
-  <!-- Why -->
   <div class="section">
     <h2><span class="icon">🎯</span> Why we collect it</h2>
     <div class="highlight">
@@ -134,14 +181,12 @@
     </div>
   </div>
 
-  <!-- Who sees it -->
   <div class="section">
     <h2><span class="icon">👤</span> Who can see your data</h2>
     <p><strong>Only the founder of HireEU.</strong> No team, no contractors, no third parties have access to the waitlist.</p>
     <p>The only exception is Neon (our database provider) who stores the data on their servers — but they cannot read or use it, they just provide the storage infrastructure.</p>
   </div>
 
-  <!-- Sharing -->
   <div class="section">
     <h2><span class="icon">🚫</span> Do we sell or share your data</h2>
     <div class="highlight">
@@ -149,16 +194,14 @@
     </div>
   </div>
 
-  <!-- Where stored -->
   <div class="section">
     <h2><span class="icon">🌍</span> Where your data is stored</h2>
     <div class="server-box">
-      <p>Your data is stored on servers located in <strong>Frankfurt, Germany</strong> (EU), provided by <a href="https://neon.tech" target="_blank" style="color:#1e40af;font-weight:600;">Neon.tech</a>.</p>
+      <p>Your data is stored on servers located in <strong>Frankfurt, Germany</strong> (EU), provided by <a href="https://neon.tech" target="_blank">Neon.tech</a>.</p>
       <p>This means your data stays within the European Union and is subject to EU data protection standards (GDPR).</p>
     </div>
   </div>
 
-  <!-- Deletion -->
   <div class="section">
     <h2><span class="icon">🗑️</span> How to request deletion</h2>
     <p>You can ask us to delete your email from the waitlist at any time, no questions asked.</p>
@@ -167,7 +210,6 @@
     </div>
   </div>
 
-  <!-- GDPR -->
   <div class="section">
     <h2><span class="icon">⚖️</span> Your rights (GDPR)</h2>
     <p>If you're in the EU or EEA, you have the right to:</p>
@@ -189,19 +231,17 @@
         <span class="data-value">Ask for a copy of your data in a readable format</span>
       </div>
     </div>
-    <p style="margin-top: 12px;">To exercise any of these, just email <a href="mailto:hireeuapp@gmail.com" style="color:var(--blue);font-weight:600;">hireeuapp@gmail.com</a>.</p>
+    <p style="margin-top: 12px;">To exercise any of these, just email <a href="mailto:hireeuapp@gmail.com">hireeuapp@gmail.com</a>.</p>
   </div>
 
-  <!-- Changes -->
   <div class="section">
     <h2><span class="icon">📝</span> Changes to this policy</h2>
     <p>If anything changes about how we handle data, we'll update this page and change the "last updated" date at the top. We won't notify you by email unless the change is significant.</p>
   </div>
 
-  <!-- Contact -->
   <div class="section">
     <h2><span class="icon">✉️</span> Contact</h2>
-    <p>Questions about privacy? Email <a href="mailto:hireeuapp@gmail.com" style="color:var(--blue);font-weight:600;">hireeuapp@gmail.com</a> — you'll get a reply from a real person, not a bot.</p>
+    <p>Questions about privacy? Email <a href="mailto:hireeuapp@gmail.com">hireeuapp@gmail.com</a> — you'll get a reply from a real person, not a bot.</p>
   </div>
 
   <footer>
