@@ -400,8 +400,18 @@
       <div class="tool-step">
         <div class="step-label">Step 01 — Your CV &amp; Target Role</div>
         <div class="field">
-          <label>Your CV <small>paste full text — the more detail, the better</small></label>
-          <div class="char-hint" id="char-count">0 characters</div>
+          <label>Your CV <small>PDF or DOCX — max 5MB</small></label>
+          <div class="upload-zone" id="upload-zone">
+            <input type="file" id="cv-file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+            <div class="upload-icon">📄</div>
+            <div class="upload-title">Drop your CV here or click to upload</div>
+            <div class="upload-hint">PDF or DOCX · Max 5MB</div>
+          </div>
+          <div class="upload-success" id="upload-success">
+            <span>✅</span>
+            <span class="upload-success-name" id="upload-filename"></span>
+            <button class="upload-remove" onclick="removeFile()" title="Remove file">×</button>
+          </div>
         </div>
         <div class="row">
           <div class="field" style="margin-bottom:0">
