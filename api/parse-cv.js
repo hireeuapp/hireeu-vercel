@@ -1,6 +1,6 @@
 // /api/parse-cv.js
-// Accepts file upload (PDF, DOCX, TXT) or plain text
-// Deps: pdf-parse, mammoth (in package.json)
+// Extracts structured candidate profile from CV (PDF, DOCX, TXT)
+// Returns skills list that search-jobs uses for pre-filtering
 
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
@@ -14,21 +14,18 @@ async function extractText(fileBase64, fileType) {
     const result = await pdfParse(buffer);
     return result.text || '';
   }
-
   if (type.includes('docx') || type.includes('wordprocessingml') || type.includes('word')) {
     const mammoth = require('mammoth');
     const result = await mammoth.extractRawText({ buffer });
     return result.value || '';
   }
-
   if (type.includes('text') || type.includes('txt')) {
     return buffer.toString('utf-8');
   }
-
   throw new Error('Unsupported file type. Please upload a PDF, DOCX, or TXT file.');
 }
 
-async function callGroq(prompt, maxTokens = 500) {
+async function callGroq(prompt, maxTokens = 700) {
   const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -70,23 +67,33 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'No CV provided.' });
   }
 
-  const prompt = `You are a CV parser. Extract structured information from this CV.
+  const prompt = `You are a CV parser. Extract structured information from this CV to help match the candidate to job listings.
 
 TARGET ROLE: ${role}
 
 CV TEXT:
 ${cvText.slice(0, 8000)}
 
-Respond ONLY with a JSON object, no markdown, no explanation:
+Extract:
+- summary: 2-3 sentence summary covering seniority level, domain, key strengths, and years of experience
+- skills: ALL technical and domain skills found — tools, languages, frameworks, methodologies, certifications. Be thorough. Include soft skills only if they are highly specific (e.g. "B2 German" not "teamwork").
+- yearsExperience: total professional years (number, estimate if unclear)
+- seniority: "junior" | "mid" | "senior" | "lead" | "executive" — infer from experience and titles
+- location: city/country if clearly stated, otherwise null
+- languages: spoken languages with levels if mentioned (e.g. ["English C2", "Polish native"])
+
+Respond ONLY with JSON — no markdown, no explanation:
 {
-  "summary": "2-3 sentence summary: seniority level, key skills, years of experience, domain",
-  "skills": ["skill1", "skill2", "skill3"],
-  "yearsExperience": 2,
-  "location": "city if clearly mentioned, otherwise null"
+  "summary": "...",
+  "skills": ["skill1", "skill2", ...],
+  "yearsExperience": 4,
+  "seniority": "mid",
+  "location": "Warsaw, Poland",
+  "languages": ["English C1", "Polish native"]
 }`;
 
   try {
-    const text = await callGroq(prompt, 500);
+    const text = await callGroq(prompt, 700);
     let parsed;
     try {
       parsed = JSON.parse(text.replace(/```json|```/g, '').trim());
@@ -96,11 +103,13 @@ Respond ONLY with a JSON object, no markdown, no explanation:
     }
 
     return res.status(200).json({
-      summary: parsed.summary,
+      summary: parsed.summary || '',
       skills: parsed.skills || [],
       yearsExperience: parsed.yearsExperience || 0,
+      seniority: parsed.seniority || 'unknown',
+      location: parsed.location || null,
+      languages: parsed.languages || [],
       searchQuery: role.trim(),
-      location: parsed.location || null
     });
 
   } catch (err) {
