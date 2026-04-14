@@ -443,6 +443,15 @@
         <div class="error-box" id="main-error"></div>
       </div>
  
+      <!-- Railway pending hint -->
+      <div id="railway-hint" style="display:none; align-items:center; gap:14px; background:#fffbf0; border:1px solid rgba(196,154,60,0.35); border-radius:3px; padding:12px 18px; margin-top:12px;">
+        <span style="font-size:18px">⏳</span>
+        <span style="font-family:var(--sans); font-size:12px; color:var(--ink2); flex:1;">
+          <strong>More Polish jobs loading</strong> — JustJoinIT, NoFluffJobs & EnglishJobs.pl are being scraped in the background. Refresh in ~30 seconds for additional results.
+        </span>
+        <button class="btn-ghost hint-btn" style="white-space:nowrap; font-size:11px;">↺ Refresh results</button>
+      </div>
+
       <!-- Step 02: Results -->
       <div id="results-section">
         <div class="tool-step" style="padding-bottom:8px">
@@ -521,75 +530,112 @@
     document.getElementById('upload-success').classList.remove('active');
   }
  
-  const loadingMsgs = ['Fetching jobs...', 'Searching Poland & EU...', 'AI scoring each role...', 'Almost done...'];
+  const loadingMsgs = [
+    'Parsing your CV...', 'Searching JSearch & Adzuna...', 'Filtering English jobs...',
+    'AI scoring each role...', 'Ranking by fit...', 'Almost done...'
+  ];
   let msgInt;
   function startMsgs() {
     let i = 0;
     document.getElementById('loading-msg').textContent = loadingMsgs[0];
-    msgInt = setInterval(() => { i = (i+1) % loadingMsgs.length; document.getElementById('loading-msg').textContent = loadingMsgs[i]; }, 2500);
+    msgInt = setInterval(() => { i = (i+1) % loadingMsgs.length; document.getElementById('loading-msg').textContent = loadingMsgs[i]; }, 3000);
   }
   function stopMsgs() { clearInterval(msgInt); }
- 
+
   async function findJobs() {
     const role = document.getElementById('role-input').value.trim();
     const country = document.getElementById('country-input').value;
 
     if (!cvFileBase64) { showErr('Please upload your CV first (PDF or DOCX).'); return; }
     if (!role) { showErr('Please enter a target role.'); return; }
- 
+
     clearErr(); setLoading(true);
     document.getElementById('results-section').classList.remove('active');
- 
+    hidePendingHint();
+
     try {
-      // Step A+B: fetch + pre-filter jobs
+      // Step 1: Parse CV to extract structured skills profile
+      const pRes = await fetch('/api/parse-cv', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role, fileBase64: cvFileBase64, fileType: cvFileType })
+      });
+      if (!pRes.ok) throw new Error(await pRes.text());
+      const cvProfile = await pRes.json();
+      // cvProfile: { summary, skills, yearsExperience, seniority, location, languages }
+
+      // Step 2: Search jobs — pass skills so search pre-filters irrelevant listings
       const countries = country ? [country] : [];
       const sRes = await fetch('/api/search-jobs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role, countries })
+        body: JSON.stringify({ role, countries, cvSkills: cvProfile.skills })
       });
       if (!sRes.ok) throw new Error(await sRes.text());
-      const { jobs } = await sRes.json();
-      if (!jobs?.length) throw new Error('No jobs found. Try a broader role title.');
- 
-      // Step C: AI scoring
-      const mRes = await fetch('/api/score-jobs', {
+      const { jobs, railwayStatus } = await sRes.json();
+      if (!jobs?.length) throw new Error('No matching jobs found. Try a broader role title or different country.');
+
+      // Show hint if Railway scraper is still warming up
+      if (railwayStatus === 'pending') showPendingHint(role, country);
+
+      // Step 3: AI match & score using the parsed CV profile
+      const mRes = await fetch('/api/match-and-score', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cv: '', fileBase64: cvFileBase64, fileType: cvFileType, jobs })
+        body: JSON.stringify({
+          summary: cvProfile.summary,
+          skills: cvProfile.skills,
+          yearsExperience: cvProfile.yearsExperience,
+          jobs
+        })
       });
       if (!mRes.ok) throw new Error(await mRes.text());
-      const { results } = await mRes.json();
- 
-      renderResults(results, role);
+      const { scored } = await mRes.json();
+
+      if (!scored?.length) throw new Error('No jobs matched your profile. Try a different role title or broaden your search.');
+
+      renderResults(scored, role);
     } catch(e) {
       showErr(e.message || 'Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
   }
+
+  function showPendingHint(role, country) {
+    const hint = document.getElementById('railway-hint');
+    if (!hint) return;
+    hint.style.display = 'flex';
+    hint.querySelector('.hint-btn').onclick = () => findJobs();
+  }
+  function hidePendingHint() {
+    const hint = document.getElementById('railway-hint');
+    if (hint) hint.style.display = 'none';
+  }
  
   function renderResults(results, role) {
     jobsStore = results;
     const list = document.getElementById('job-list');
     list.innerHTML = '';
- 
+
     if (!results.length) {
       document.getElementById('results-meta').innerHTML = `No results found for "${role}".`;
       document.getElementById('results-section').classList.add('active');
       return;
     }
- 
+
     document.getElementById('results-meta').innerHTML =
-      `<strong>${results.length} jobs</strong> scored for "${role}" — best matches first`;
- 
+      `<strong>${results.length} jobs</strong> matched for "${role}" — best fit first`;
+
     results.forEach((job, i) => {
-      const scoreClass = job.score >= 65 ? 'high' : job.score >= 40 ? 'mid' : 'low';
-      const scoreColorClass = job.score >= 65 ? 'score-high' : job.score >= 40 ? 'score-mid' : 'score-low';
- 
-      const missingHtml = job.missing_skills?.length
-        ? `<div class="missing-label">Missing skills</div>
-           <div class="missing-skills">${job.missing_skills.map(s => `<span class="skill-tag">${esc(s)}</span>`).join('')}</div>`
+      const score = job.match ?? job.score ?? 0;
+      const scoreClass = score >= 65 ? 'high' : score >= 45 ? 'mid' : 'low';
+      const scoreColorClass = score >= 65 ? 'score-high' : score >= 45 ? 'score-mid' : 'score-low';
+
+      const missingArr = job.missingSkills || job.missing_skills || [];
+      const missingHtml = missingArr.length
+        ? `<div class="missing-label">Skills to highlight or learn</div>
+           <div class="missing-skills">${missingArr.map(s => `<span class="skill-tag">${esc(s)}</span>`).join('')}</div>`
         : '';
  
       const card = document.createElement('div');
@@ -602,13 +648,13 @@
             <div class="job-meta">
               <span>${esc(job.company)}</span>
               <span>${esc(job.location)}</span>
-              <span class="job-source ${job.source === 'Poland' ? 'poland' : ''}">${esc(job.source || 'EU')}</span>
+              <span class="job-source ${job.source === 'Poland' || job.source === 'JustJoinIT' ? 'poland' : ''}">${esc(job.source || 'EU')}</span>
             </div>
           </div>
           <div class="score-block">
-            <div class="score-num ${scoreColorClass}">${job.score}</div>
+            <div class="score-num ${scoreColorClass}">${score}</div>
             <div class="score-lbl">/ 100</div>
-            <div class="score-bar"><div class="score-fill ${scoreClass}" style="width:${job.score}%"></div></div>
+            <div class="score-bar"><div class="score-fill ${scoreClass}" style="width:${score}%"></div></div>
           </div>
         </div>
         <div class="job-reason">${esc(job.reason)}</div>
