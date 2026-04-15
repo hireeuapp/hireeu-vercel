@@ -12,12 +12,7 @@ const ADZUNA_MAP = {
 // Heuristic: checks for common non-English chars + high-frequency English words
 // Intentionally lenient — only blocks clearly non-English content
 const NON_ENGLISH_PATTERNS = [
-  /[àáâãäåæçèéêëìíîïðñòóôõöùúûüýþßœ]{3,}/i,   // French/German/Spanish diacritics
-  /[ąćęłńóśźż]/i,                                // Polish specific
-  /[\u0400-\u04FF]/,                              // Cyrillic
-  /[\u4E00-\u9FFF]/,                              // Chinese
-  /[\u3040-\u309F\u30A0-\u30FF]/,                // Japanese
-  /[\u0600-\u06FF]/,                              // Arabic
+  /[àáâãäåæçèéêëìíîïðñòóôõöùúûüýþßœ]{3,}/i,   // French/German/Spanish diacritics// Arabic
 ];
 
 const ENGLISH_SIGNALS = [
