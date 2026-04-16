@@ -442,15 +442,6 @@
         </div>
         <div class="error-box" id="main-error"></div>
       </div>
- 
-      <!-- Railway pending hint -->
-      <div id="railway-hint" style="display:none; align-items:center; gap:14px; background:#fffbf0; border:1px solid rgba(196,154,60,0.35); border-radius:3px; padding:12px 18px; margin-top:12px;">
-        <span style="font-size:18px">⏳</span>
-        <span style="font-family:var(--sans); font-size:12px; color:var(--ink2); flex:1;">
-          <strong>More Polish jobs loading</strong> — JustJoinIT, NoFluffJobs & EnglishJobs.pl are being scraped in the background. Refresh in ~30 seconds for additional results.
-        </span>
-        <button class="btn-ghost hint-btn" style="white-space:nowrap; font-size:11px;">↺ Refresh results</button>
-      </div>
 
       <!-- Step 02: Results -->
       <div id="results-section">
@@ -569,14 +560,11 @@
       const sRes = await fetch('/api/search-jobs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role, countries, cvSkills: cvProfile.skills })
-      });
-      if (!sRes.ok) throw new Error(await sRes.text());
-      const { jobs, railwayStatus } = await sRes.json();
-      if (!jobs?.length) throw new Error('No matching jobs found. Try a broader role title or different country.');
-
-      // Show hint if Railway scraper is still warming up
-      if (railwayStatus === 'pending') showPendingHint(role, country);
+        body: JSON.stringify({ role, cvSkills: cvProfile.skills })
+        });
+        if (!sRes.ok) throw new Error(await sRes.text());
+        const { jobs } = await sRes.json();
+        if (!jobs?.length) throw new Error('No matching jobs found. Try a broader role like "QA engineer" or "software tester".');
 
       // Step 3: AI match & score using the parsed CV profile
       const mRes = await fetch('/api/match-and-score', {
@@ -602,16 +590,6 @@
     }
   }
 
-  function showPendingHint(role, country) {
-    const hint = document.getElementById('railway-hint');
-    if (!hint) return;
-    hint.style.display = 'flex';
-    hint.querySelector('.hint-btn').onclick = () => findJobs();
-  }
-  function hidePendingHint() {
-    const hint = document.getElementById('railway-hint');
-    if (hint) hint.style.display = 'none';
-  }
  
   function renderResults(results, role) {
     jobsStore = results;
