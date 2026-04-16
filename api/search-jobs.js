@@ -1,73 +1,103 @@
 // /api/search-jobs.js
-// Sources: JSearch (RapidAPI) + Adzuna + Railway scraper (async cache)
-// Filter: English-language jobs only (heuristic)
-// CV-aware: accepts parsed CV skills to pre-score relevance before AI scoring
+// Sources: JSearch (RapidAPI) + Adzuna
+// No scraper dependency whatsoever.
+// Key feature: role synonym expansion — "testing" → ["QA engineer","software tester","manual tester","quality assurance"]
+// so one vague input catches all real job title variants across both APIs.
 
+// ── Role synonym map ─────────────────────────────────────────────────────────
+// Input is lowercased before lookup. Add more rows as needed.
+const ROLE_SYNONYMS = {
+  'testing':              ['QA engineer', 'software tester', 'manual tester', 'quality assurance'],
+  'qa':                   ['QA engineer', 'quality assurance', 'software tester', 'QA analyst'],
+  'tester':               ['QA engineer', 'software tester', 'manual tester', 'QA specialist'],
+  'qa engineer':          ['QA engineer', 'quality assurance engineer', 'software tester'],
+  'qa tester':            ['QA tester', 'software tester', 'manual tester', 'QA engineer'],
+  'manual tester':        ['manual tester', 'QA engineer', 'software tester'],
+  'automation tester':    ['automation tester', 'QA automation engineer', 'SDET', 'test automation engineer'],
+  'developer':            ['software developer', 'software engineer', 'backend developer', 'frontend developer'],
+  'frontend':             ['frontend developer', 'React developer', 'UI developer', 'JavaScript developer'],
+  'backend':              ['backend developer', 'Node.js developer', 'Java developer', 'Python developer'],
+  'fullstack':            ['fullstack developer', 'full stack developer', 'software engineer'],
+  'devops':               ['DevOps engineer', 'SRE', 'platform engineer', 'infrastructure engineer'],
+  'data':                 ['data analyst', 'data engineer', 'business intelligence analyst', 'data scientist'],
+  'data analyst':         ['data analyst', 'business intelligence analyst', 'BI analyst'],
+  'pm':                   ['project manager', 'IT project manager', 'scrum master', 'delivery manager'],
+  'project manager':      ['IT project manager', 'project manager', 'scrum master'],
+  'product manager':      ['product manager', 'product owner', 'PO'],
+  'java':                 ['Java developer', 'Java engineer', 'backend Java developer'],
+  'python':               ['Python developer', 'Python engineer', 'backend Python developer'],
+  'javascript':           ['JavaScript developer', 'frontend developer', 'Node.js developer'],
+  'react':                ['React developer', 'frontend developer', 'React engineer'],
+  'mobile':               ['mobile developer', 'Android developer', 'iOS developer', 'React Native developer'],
+  'android':              ['Android developer', 'mobile developer', 'Kotlin developer'],
+  'ios':                  ['iOS developer', 'Swift developer', 'mobile developer'],
+  'security':             ['cybersecurity engineer', 'security analyst', 'penetration tester', 'infosec engineer'],
+  'support':              ['IT support specialist', 'technical support engineer', 'helpdesk engineer'],
+  'analyst':              ['business analyst', 'data analyst', 'systems analyst', 'IT analyst'],
+};
+
+function expandRole(role) {
+  const key = role.trim().toLowerCase();
+  // Exact match first
+  if (ROLE_SYNONYMS[key]) return ROLE_SYNONYMS[key];
+  // Partial match — e.g. "game tester" contains "tester"
+  for (const [k, v] of Object.entries(ROLE_SYNONYMS)) {
+    if (key.includes(k) || k.includes(key)) return [role, ...v].slice(0, 4);
+  }
+  // No match — just use what they typed
+  return [role];
+}
+
+// ── Adzuna country map ────────────────────────────────────────────────────────
 const ADZUNA_MAP = {
   poland: 'pl', germany: 'de', france: 'fr', italy: 'it',
   spain: 'es', austria: 'at', 'united kingdom': 'gb', netherlands: 'nl',
 };
 
 // ── English detection ────────────────────────────────────────────────────────
-// Heuristic: checks for common non-English chars + high-frequency English words
-// Intentionally lenient — only blocks clearly non-English content
 const NON_ENGLISH_PATTERNS = [
-  /[àáâãäåæçèéêëìíîïðñòóôõöùúûüýþßœ]{3,}/i,   // French/German/Spanish diacritics// Arabic
+  /[àáâãäåæçèéêëìíîïðñòóôõöùúûüýþßœ]{3,}/i,
+  /[\u0600-\u06FF\u0590-\u05FF]{4,}/,
+  /[\u4E00-\u9FFF\u3040-\u30FF\uAC00-\uD7AF]{3,}/,
 ];
+const ENGLISH_WORD_RE = /\b(the|and|for|with|you|our|this|will|have|are|we|your|that|from|an?)\b/gi;
 
-const ENGLISH_SIGNALS = [
-  /\b(the|and|for|with|you|our|this|will|have|are|we|your|that|from|an?)\b/gi
-];
-
-function isLikelyEnglish(text) {
-  if (!text || text.length < 30) return true; // too short to tell — keep it
-
-  const sample = text.slice(0, 600);
-
-  // Fail fast on strong non-English character patterns
-  for (const pat of NON_ENGLISH_PATTERNS) {
-    if (pat.test(sample)) return false;
-  }
-
-  // Require at least a few common English words
-  const englishMatches = (sample.match(ENGLISH_SIGNALS[0]) || []).length;
-  if (sample.length > 100 && englishMatches < 4) return false;
-
+function isEnglishJob(job) {
+  const sample = `${job.title} ${job.description}`.slice(0, 600);
+  if (sample.length < 40) return true;
+  for (const pat of NON_ENGLISH_PATTERNS) if (pat.test(sample)) return false;
+  const hits = (sample.match(ENGLISH_WORD_RE) || []).length;
+  if (sample.length > 120 && hits < 4) return false;
   return true;
 }
 
-function isEnglishJob(job) {
-  // Check title + description together
-  const combined = `${job.title} ${job.description}`;
-  return isLikelyEnglish(combined);
+// ── Deduplication ────────────────────────────────────────────────────────────
+function normalize(str) {
+  return (str || '').toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim();
 }
 
-// ── JSearch (RapidAPI) ───────────────────────────────────────────────────────
-// Covers: worldwide, great English-language results, Poland included
-async function fetchJSearch(role, countries, apiKey) {
-  const results = [];
+function dedupe(jobs) {
+  const seen = new Set();
+  return jobs.filter(j => {
+    const key = normalize(j.title) + '||' + normalize(j.company);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
 
-  // Build location queries — JSearch takes natural language location
-  const locations = [];
-  if (!countries.length || countries.includes('poland')) locations.push('Poland');
-  const euCountries = countries.filter(c => c !== 'poland' && ADZUNA_MAP[c]);
-  if (!countries.length) {
-    // Default: Poland + top EU countries with English job markets
-    locations.push('Germany', 'Netherlands', 'Austria');
-  } else {
-    const nameMap = { de: 'Germany', fr: 'France', it: 'Italy', es: 'Spain', at: 'Austria', gb: 'United Kingdom', nl: 'Netherlands' };
-    for (const c of euCountries) { if (nameMap[ADZUNA_MAP[c]]) locations.push(nameMap[ADZUNA_MAP[c]]); }
-  }
-
-  // Run one query per location (parallel), 10 results each
-  const fetches = locations.map(async (location) => {
+// ── JSearch ──────────────────────────────────────────────────────────────────
+// One query per synonym, Poland-first, then EU fallback
+async function fetchJSearch(queries, apiKey) {
+  // Always anchor to Poland. Each synonym gets its own query.
+  const fetches = queries.map(async (q) => {
     try {
       const url = new URL('https://jsearch.p.rapidapi.com/search');
-      url.searchParams.set('query', `${role} in ${location}`);
+      url.searchParams.set('query', `${q} in Poland`);
       url.searchParams.set('num_pages', '1');
       url.searchParams.set('page', '1');
       url.searchParams.set('date_posted', 'month');
-      url.searchParams.set('language', 'en_GB'); // prefer English listings
+      url.searchParams.set('language', 'en_GB');
 
       const r = await fetch(url.toString(), {
         headers: {
@@ -77,201 +107,149 @@ async function fetchJSearch(role, countries, apiKey) {
         signal: AbortSignal.timeout(12000),
       });
 
-      if (!r.ok) { console.error(`JSearch ${location}:`, r.status); return []; }
+      if (!r.ok) { console.error(`JSearch "${q}":`, r.status); return []; }
       const d = await r.json();
 
       return (d.data || []).slice(0, 10).map(j => ({
         id: 'js_' + (j.job_id || Math.random()),
         title: j.job_title || '',
         company: j.employer_name || '',
-        location: [j.job_city, j.job_country].filter(Boolean).join(', ') || location,
+        location: [j.job_city, j.job_country].filter(Boolean).join(', ') || 'Poland',
         description: (j.job_description || '').slice(0, 1000),
         applyUrl: j.job_apply_link || j.job_google_link || '',
         postedAt: j.job_posted_at_datetime_utc || null,
         source: 'JSearch',
-        employmentType: j.job_employment_type || '',
         isRemote: j.job_is_remote || false,
       }));
     } catch (e) {
-      console.error(`JSearch ${location} error:`, e.message);
+      console.error(`JSearch "${q}" error:`, e.message);
       return [];
     }
   });
 
-  const perLocation = await Promise.all(fetches);
-  return perLocation.flat();
+  const results = await Promise.all(fetches);
+  return results.flat();
 }
 
 // ── Adzuna ───────────────────────────────────────────────────────────────────
-async function fetchAdzuna(code, query, appId, appKey) {
-  try {
-    const url = new URL(`https://api.adzuna.com/v1/api/jobs/${code}/search/1`);
-    url.searchParams.set('app_id', appId);
-    url.searchParams.set('app_key', appKey);
-    url.searchParams.set('what', query);
-    url.searchParams.set('results_per_page', '15');
-    url.searchParams.set('max_days_old', '30');
-    url.searchParams.set('sort_by', 'date');
-    const r = await fetch(url.toString(), { headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(10000) });
-    if (!r.ok) { console.error('Adzuna', code, r.status); return []; }
-    const d = await r.json();
-    return (d.results || []).map(j => ({
-      id: 'a_' + j.id,
-      title: j.title || '',
-      company: j.company?.display_name || '',
-      location: j.location?.display_name || '',
-      description: (j.description || '').slice(0, 1000),
-      applyUrl: j.redirect_url || '',
-      postedAt: j.created || null,
-      source: 'Adzuna',
-    }));
-  } catch (e) { console.error('Adzuna error:', e.message); return []; }
-}
+// One query per synonym against Poland (pl), then GB as English fallback
+async function fetchAdzuna(queries, appId, appKey) {
+  const codes = ['pl', 'gb']; // Poland first, UK as English-job fallback
 
-// ── Railway scraper (async cache) ────────────────────────────────────────────
-function kickOffRailwayScrape(role, scraperUrl) {
-  fetch(`${scraperUrl}/scrape-async?role=${encodeURIComponent(role)}`, {
-    signal: AbortSignal.timeout(5000),
-  })
-    .then(r => r.json())
-    .then(d => console.log(`[railway] trigger: ${d.triggered ? 'started' : d.reason}`))
-    .catch(e => console.error('[railway] trigger error:', e.message));
-}
+  const fetches = [];
+  for (const code of codes) {
+    for (const q of queries.slice(0, 2)) { // cap at 2 synonyms × 2 countries = 4 calls
+      fetches.push((async () => {
+        try {
+          const url = new URL(`https://api.adzuna.com/v1/api/jobs/${code}/search/1`);
+          url.searchParams.set('app_id', appId);
+          url.searchParams.set('app_key', appKey);
+          url.searchParams.set('what', q);
+          url.searchParams.set('results_per_page', '15');
+          url.searchParams.set('max_days_old', '30');
+          url.searchParams.set('sort_by', 'date');
 
-async function fetchRailwayCached(role, scraperUrl) {
-  try {
-    const r = await fetch(
-      `${scraperUrl}/scrape-cached?role=${encodeURIComponent(role)}`,
-      { signal: AbortSignal.timeout(5000) }
-    );
-    if (!r.ok) return [];
-    const { status, jobs } = await r.json();
-    console.log(`[railway] status="${status}" jobs=${jobs?.length ?? 0}`);
-    if (status !== 'done' && status !== 'stale') return [];
-    return (jobs || []).map(j => ({
-      id: j.id || ('sc_' + encodeURIComponent(j.applyUrl || Math.random())),
-      title: j.title || '',
-      company: j.company || '',
-      location: j.location || 'Poland',
-      description: (j.description || '').slice(0, 1000),
-      applyUrl: j.applyUrl || j.url || '',
-      postedAt: null,
-      source: j.source || 'JustJoinIT',
-    }));
-  } catch (e) {
-    console.error('[railway] cached fetch error:', e.message);
-    return [];
-  }
-}
+          const r = await fetch(url.toString(), {
+            headers: { Accept: 'application/json' },
+            signal: AbortSignal.timeout(10000),
+          });
+          if (!r.ok) { console.error(`Adzuna ${code} "${q}":`, r.status); return []; }
+          const d = await r.json();
 
-// ── CV-based pre-filter ───────────────────────────────────────────────────────
-// Quick keyword overlap check — removes clearly irrelevant jobs before AI scoring
-// This is intentionally lenient (keeps borderline cases)
-function cvRelevanceScore(job, cvSkills, role) {
-  const text = `${job.title} ${job.description}`.toLowerCase();
-  const roleWords = role.toLowerCase().split(/\s+/).filter(w => w.length > 2);
-
-  // Title must loosely match the role — strict gate
-  const titleMatch = roleWords.some(w => job.title.toLowerCase().includes(w));
-  if (!titleMatch) return 0;
-
-  if (!cvSkills || cvSkills.length === 0) return 50; // no CV skills to check — keep
-
-  // Count how many CV skills appear in the job
-  let hits = 0;
-  for (const skill of cvSkills) {
-    if (text.includes(skill.toLowerCase())) hits++;
-  }
-
-  const ratio = hits / cvSkills.length;
-  // Return a rough score 20–80 — we keep anything above 15
-  return Math.round(20 + ratio * 60);
-}
-
-export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-
-  const { role, countries, cvSkills } = req.body;
-  if (!role) return res.status(400).json({ error: 'Missing role' });
-
-  const jsearchKey  = process.env.JSEARCH_API_KEY;
-  const adzunaId    = process.env.ADZUNA_APP_ID;
-  const adzunaKey   = process.env.ADZUNA_APP_KEY;
-  const scraperUrl  = process.env.SCRAPER_URL;
-
-  const selectedLower = Array.isArray(countries) && countries.length > 0
-    ? countries.map(c => c.toLowerCase())
-    : [];
-
-  const includesPoland = selectedLower.length === 0 || selectedLower.includes('poland');
-
-  // ── Build tasks ──────────────────────────────────────────────────────────────
-  const tasks = [];
-
-  // JSearch — best English job coverage
-  if (jsearchKey) {
-    tasks.push(fetchJSearch(role, selectedLower, jsearchKey));
-  }
-
-  // Adzuna — good for Poland + EU
-  if (adzunaId) {
-    const codes = selectedLower.length > 0
-      ? selectedLower.map(c => ADZUNA_MAP[c]).filter(Boolean)
-      : ['pl', 'de', 'nl']; // sensible defaults for English jobs in EU
-    for (const code of codes) {
-      tasks.push(fetchAdzuna(code, role, adzunaId, adzunaKey));
+          return (d.results || []).map(j => ({
+            id: 'a_' + j.id,
+            title: j.title || '',
+            company: j.company?.display_name || '',
+            location: j.location?.display_name || '',
+            description: (j.description || '').slice(0, 1000),
+            applyUrl: j.redirect_url || '',
+            postedAt: j.created || null,
+            source: 'Adzuna',
+            isRemote: false,
+          }));
+        } catch (e) {
+          console.error(`Adzuna ${code} "${q}" error:`, e.message);
+          return [];
+        }
+      })());
     }
   }
 
-  if (tasks.length === 0) return res.status(500).json({ error: 'No job API keys configured. Add JSEARCH_API_KEY or ADZUNA_APP_ID.' });
+  const results = await Promise.all(fetches);
+  return results.flat();
+}
 
-  // Railway scraper (async)
-  let railwayCachedPromise = Promise.resolve([]);
-  if (scraperUrl && includesPoland) {
-    kickOffRailwayScrape(role, scraperUrl);
-    railwayCachedPromise = fetchRailwayCached(role, scraperUrl);
-    tasks.push(railwayCachedPromise);
+// ── Citizenship / clearance blacklist ────────────────────────────────────────
+const BLOCKED_PHRASES = [
+  'security clearance', 'us citizen', 'u.s. citizen', 'nato secret',
+  'only citizens', 'must be a citizen', 'citizenship required',
+];
+function isBlocked(job) {
+  const text = `${job.title} ${job.description}`.toLowerCase();
+  return BLOCKED_PHRASES.some(p => text.includes(p));
+}
+
+// ── Poland boost ─────────────────────────────────────────────────────────────
+function isPoland(job) {
+  const loc = (job.location || '').toLowerCase();
+  return loc.includes('poland') || loc.includes('warszawa') || loc.includes('warsaw') ||
+    loc.includes('kraków') || loc.includes('krakow') || loc.includes('wrocław') ||
+    loc.includes('wroclaw') || loc.includes('gdańsk') || loc.includes('gdansk') ||
+    loc.includes('poznań') || loc.includes('poznan') || loc.includes('łódź') || loc.includes('lodz');
+}
+
+// ── Main handler ─────────────────────────────────────────────────────────────
+export default async function handler(req, res) {
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  const { role, cvSkills } = req.body;
+  if (!role) return res.status(400).json({ error: 'Missing role' });
+
+  const jsearchKey = process.env.JSEARCH_API_KEY;
+  const adzunaId   = process.env.ADZUNA_APP_ID;
+  const adzunaKey  = process.env.ADZUNA_APP_KEY;
+
+  if (!jsearchKey && !adzunaId) {
+    return res.status(500).json({ error: 'No API keys configured. Add JSEARCH_API_KEY and/or ADZUNA_APP_ID.' });
   }
 
-  // ── Fetch all in parallel ────────────────────────────────────────────────────
-  const settled = await Promise.allSettled(tasks);
-  const all = settled.flatMap(r => r.status === 'fulfilled' ? r.value : []);
+  // Expand role into synonyms — this is the core fix for "testing" returning dev jobs
+  const queries = expandRole(role);
+  console.log(`Role expansion: "${role}" → [${queries.join(', ')}]`);
 
-  // ── Deduplicate by id ────────────────────────────────────────────────────────
-  const seen = new Set();
-  const unique = all.filter(j => {
-    if (!j.id || seen.has(j.id)) return false;
-    seen.add(j.id); return true;
+  // ── Fetch all sources in parallel ────────────────────────────────────────
+  const [jsearchJobs, adzunaJobs] = await Promise.all([
+    jsearchKey ? fetchJSearch(queries, jsearchKey) : Promise.resolve([]),
+    adzunaId   ? fetchAdzuna(queries, adzunaId, adzunaKey) : Promise.resolve([]),
+  ]);
+
+  const raw = [...jsearchJobs, ...adzunaJobs];
+  console.log(`Raw: jsearch=${jsearchJobs.length} adzuna=${adzunaJobs.length} total=${raw.length}`);
+
+  // ── Deduplicate ──────────────────────────────────────────────────────────
+  const unique = dedupe(raw);
+
+  // ── English filter ───────────────────────────────────────────────────────
+  const english = unique.filter(isEnglishJob);
+
+  // ── Hard blacklist ───────────────────────────────────────────────────────
+  const clean = english.filter(j => !isBlocked(j));
+
+  // ── Sort: Poland first, then by recency ──────────────────────────────────
+  clean.sort((a, b) => {
+    const ap = isPoland(a) ? 1 : 0;
+    const bp = isPoland(b) ? 1 : 0;
+    if (ap !== bp) return bp - ap;
+    const ad = a.postedAt ? new Date(a.postedAt).getTime() : 0;
+    const bd = b.postedAt ? new Date(b.postedAt).getTime() : 0;
+    return bd - ad;
   });
 
-  // ── English filter ───────────────────────────────────────────────────────────
-  const englishOnly = unique.filter(isEnglishJob);
-  console.log(`English filter: ${unique.length} → ${englishOnly.length} jobs`);
+  // Cap at 50 — scorer batches in 8s, 50 is fine
+  const jobs = clean.slice(0, 50);
 
-  // ── CV relevance pre-filter ──────────────────────────────────────────────────
-  // Score each job, drop clear mismatches (score 0 = title doesn't match role at all)
-  const skills = Array.isArray(cvSkills) ? cvSkills : [];
-  const withRelevance = englishOnly.map(j => ({
-    ...j,
-    _preScore: cvRelevanceScore(j, skills, role),
-  }));
+  console.log(`search-jobs: ${raw.length} raw → ${unique.length} deduped → ${english.length} english → ${clean.length} clean → ${jobs.length} returned`);
+  console.log(`Poland jobs: ${jobs.filter(isPoland).length} / ${jobs.length}`);
 
-  // Remove jobs where title doesn't match role at all
-  const titleFiltered = withRelevance.filter(j => j._preScore > 0);
-
-  // Sort by pre-score so AI scorer sees best candidates first
-  titleFiltered.sort((a, b) => b._preScore - a._preScore);
-
-  // Cap at 40 to keep AI scoring fast — take the most relevant ones
-  const jobs = titleFiltered.slice(0, 40).map(({ _preScore, ...j }) => j);
-
-  const railwayCached = await railwayCachedPromise;
-  const railwayStatus = !scraperUrl ? 'disabled'
-    : railwayCached.length > 0 ? 'included' : 'pending';
-
-  console.log(
-    `search-jobs: ${unique.length} raw → ${englishOnly.length} english → ${titleFiltered.length} title-matched → returning ${jobs.length} | railway=${railwayStatus}`
-  );
-
-  return res.status(200).json({ jobs, railwayStatus });
+  return res.status(200).json({ jobs });
 }
