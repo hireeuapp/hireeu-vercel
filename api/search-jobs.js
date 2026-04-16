@@ -97,7 +97,6 @@ async function fetchJSearch(queries, apiKey) {
       url.searchParams.set('num_pages', '1');
       url.searchParams.set('page', '1');
       url.searchParams.set('date_posted', 'month');
-      url.searchParams.set('language', 'en_GB');
 
       const r = await fetch(url.toString(), {
         headers: {
@@ -109,8 +108,40 @@ async function fetchJSearch(queries, apiKey) {
 
       if (!r.ok) { console.error(`JSearch "${q}":`, r.status); return []; }
       const d = await r.json();
+      const primary = (d.data || []).slice(0, 10).map(j => ({
+        id: 'js_' + (j.job_id || Math.random()),
+        title: j.job_title || '',
+        company: j.employer_name || '',
+        location: [j.job_city, j.job_country].filter(Boolean).join(', ') || 'Poland',
+        description: (j.job_description || '').slice(0, 1000),
+        applyUrl: j.job_apply_link || j.job_google_link || '',
+        postedAt: j.job_posted_at_datetime_utc || null,
+        source: 'JSearch',
+        isRemote: j.job_is_remote || false,
+      }));
 
-      return (d.data || []).slice(0, 10).map(j => ({
+      if (primary.length) return primary;
+
+      // Fallback: some titles return nothing with "in Poland"; retry broader query.
+      const fallbackUrl = new URL('https://jsearch.p.rapidapi.com/search');
+      fallbackUrl.searchParams.set('query', q);
+      fallbackUrl.searchParams.set('num_pages', '1');
+      fallbackUrl.searchParams.set('page', '1');
+      fallbackUrl.searchParams.set('date_posted', 'month');
+
+      const fallbackRes = await fetch(fallbackUrl.toString(), {
+        headers: {
+          'X-RapidAPI-Key': apiKey,
+          'X-RapidAPI-Host': 'jsearch.p.rapidapi.com',
+        },
+        signal: AbortSignal.timeout(12000),
+      });
+      if (!fallbackRes.ok) {
+        console.error(`JSearch fallback "${q}":`, fallbackRes.status);
+        return [];
+      }
+      const fallbackData = await fallbackRes.json();
+      return (fallbackData.data || []).slice(0, 10).map(j => ({
         id: 'js_' + (j.job_id || Math.random()),
         title: j.job_title || '',
         company: j.employer_name || '',
@@ -205,7 +236,7 @@ export default async function handler(req, res) {
   const { role, cvSkills } = req.body;
   if (!role) return res.status(400).json({ error: 'Missing role' });
 
-  const jsearchKey = process.env.JSEARCH_API_KEY;
+  const jsearchKey = process.env.JSEARCH_API_KEY || process.env.RAPIDAPI_KEY || process.env.X_RAPIDAPI_KEY;
   const adzunaId   = process.env.ADZUNA_APP_ID;
   const adzunaKey  = process.env.ADZUNA_APP_KEY;
 
