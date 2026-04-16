@@ -36,16 +36,61 @@ const ROLE_SYNONYMS = {
   'analyst':              ['business analyst', 'data analyst', 'systems analyst', 'IT analyst'],
 };
 
+/** Keys whose synonyms are QA / testing — used for relevance filtering */
+const QA_INTENT_KEYS = new Set([
+  'testing', 'qa', 'tester', 'qa engineer', 'qa tester', 'manual tester', 'automation tester',
+]);
+
+/**
+ * Strip noise so "testing jobs" → "testing", "QA engineer role" → "qa engineer".
+ */
+function normalizeRolePhrase(role) {
+  let s = role.trim().toLowerCase();
+  s = s.replace(/\b(jobs?|roles?|positions?|openings?|vacancies?|hiring|remote|full[\s-]?time|part[\s-]?time)\b/gi, ' ');
+  return s.replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * Returns { queries, qaIntent } — qaIntent true when we should keep only QA/testing-related listings.
+ */
 function expandRole(role) {
-  const key = role.trim().toLowerCase();
+  const key = normalizeRolePhrase(role);
   // Exact match first
-  if (ROLE_SYNONYMS[key]) return ROLE_SYNONYMS[key];
-  // Partial match — e.g. "game tester" contains "tester"
-  for (const [k, v] of Object.entries(ROLE_SYNONYMS)) {
-    if (key.includes(k) || k.includes(key)) return [role, ...v].slice(0, 4);
+  if (ROLE_SYNONYMS[key]) {
+    const queries = ROLE_SYNONYMS[key];
+    return {
+      queries,
+      qaIntent: QA_INTENT_KEYS.has(key),
+    };
   }
-  // No match — just use what they typed
-  return [role];
+  // Partial match — longest keys first so "software testing" matches "testing" before "data"
+  const entries = Object.entries(ROLE_SYNONYMS).sort((a, b) => b[0].length - a[0].length);
+  for (const [k, v] of entries) {
+    if (!k) continue;
+    const userHasKey = key.includes(k);
+    const keyHasUser = k.includes(key) && key.length >= 3;
+    if (userHasKey || keyHasUser) {
+      // Do not prepend raw user text — it produces noisy queries like "testing jobs in Poland"
+      const queries = v.slice(0, 4);
+      return {
+        queries,
+        qaIntent: QA_INTENT_KEYS.has(k),
+      };
+    }
+  }
+  // No match — just use what they typed (normalized)
+  return { queries: [key || role.trim()], qaIntent: false };
+}
+
+/** Keep listings that clearly relate to QA / software testing (title + snippet of description). */
+function jobMatchesQaIntent(job) {
+  const title = (job.title || '').toLowerCase();
+  const text = `${title} ${(job.description || '').slice(0, 500)}`.toLowerCase();
+  return (
+    /\bqa\b|\bq\.a\.\b|\bqe\b|quality assurance|quality engineer|software tester|manual tester|test engineer|testing engineer|test automation|automation tester|sdet|\bstlc\b|\bvctc\b|regression test/.test(text) ||
+    /\btester\b/.test(text) ||
+    (/test/.test(title) && /(qa|quality|assurance|automation|manual|software)/.test(title))
+  );
 }
 
 // ── Adzuna country map ────────────────────────────────────────────────────────
@@ -244,9 +289,9 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'No API keys configured. Add JSEARCH_API_KEY and/or ADZUNA_APP_ID.' });
   }
 
-  // Expand role into synonyms — this is the core fix for "testing" returning dev jobs
-  const queries = expandRole(role);
-  console.log(`Role expansion: "${role}" → [${queries.join(', ')}]`);
+  // Expand role into synonyms — avoid noisy raw queries; optional QA relevance filter
+  const { queries, qaIntent } = expandRole(role);
+  console.log(`Role expansion: "${role}" → [${queries.join(', ')}] qaIntent=${qaIntent}`);
 
   // ── Fetch all sources in parallel ────────────────────────────────────────
   const [jsearchJobs, adzunaJobs] = await Promise.all([
@@ -264,7 +309,14 @@ export default async function handler(req, res) {
   const english = unique.filter(isEnglishJob);
 
   // ── Hard blacklist ───────────────────────────────────────────────────────
-  const clean = english.filter(j => !isBlocked(j));
+  let clean = english.filter(j => !isBlocked(j));
+
+  // When the user asked for QA/testing, drop listings that are clearly unrelated (e.g. generic backend dev)
+  if (qaIntent) {
+    const before = clean.length;
+    clean = clean.filter(jobMatchesQaIntent);
+    console.log(`QA intent filter: ${before} → ${clean.length} jobs`);
+  }
 
   // ── Sort: Poland first, then by recency ──────────────────────────────────
   clean.sort((a, b) => {
